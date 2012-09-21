@@ -27,7 +27,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_multiple'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_multiple'],
 	'inputType'               => 'checkbox',
-	'eval'                    => array('submitOnChange'=>true, 'tl_class'=>'clr')
+	'eval'                    => array('tl_class'=>'clr')
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_uploadFolder'] = array
