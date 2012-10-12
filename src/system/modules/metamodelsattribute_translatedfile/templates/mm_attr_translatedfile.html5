@@ -1,3 +1,4 @@
+<?php if (is_array($this->src)): ?>
 <ul>
 <?php foreach($this->src as $arrFile): ?>
 <li class="<?php echo $arrFile['class']; ?>">
@@ -19,3 +20,4 @@
 </li>
 <?php endforeach; ?>
 </ul>
+<?php endif; ?>
