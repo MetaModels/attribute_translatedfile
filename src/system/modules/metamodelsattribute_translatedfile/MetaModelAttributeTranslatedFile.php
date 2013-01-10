@@ -294,9 +294,9 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 			));
 	}
 
-	public function getFieldDefinition()
+	public function getFieldDefinition($arrOverrides = array())
 	{
-		$arrFieldDef = parent::getFieldDefinition();
+		$arrFieldDef = parent::getFieldDefinition($arrOverrides);
 
 		$arrFieldDef['inputType'] = 'fileTree';
 
