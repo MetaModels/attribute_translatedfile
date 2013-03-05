@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
  * The MetaModels extension allows the creation of multiple collections of custom items,
@@ -7,8 +7,8 @@
  * data in each collection.
  *
  * PHP version 5
- * @package	   MetaModels
- * @subpackage AttributeText
+ * @package    MetaModels
+ * @subpackage AttributeTranslatedFile
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  The MetaModels team.
  * @license    LGPL.
@@ -20,4 +20,3 @@ $GLOBALS['METAMODELS']['attributes']['translatedfile'] = array
 	'class' => 'MetaModelAttributeTranslatedFile',
 	'image' => 'system/modules/metamodelsattribute_translatedfile/html/file.png'
 );
-?>

@@ -10,17 +10,25 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedFile
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @author     Andreas Isaak <info@andreas-isaak.de>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_dcasetting']['metasubselectpalettes']['attr_id']['translatedfile'] = array
+/**
+ * Register the classes
+ */
+ClassLoader::addClasses(array
 (
-	'presentation' => array(
-	'tl_class',
-	),
-	'functions'  => array(
-		'mandatory',
-	)
-);
+	'MetaModelAttributeTranslatedFile'              => 'system/modules/metamodelsattribute_translatedfile/MetaModelAttributeTranslatedFile',
+));
+
+
+/**
+ * Register the templates
+ */
+TemplateLoader::addFiles(array
+(
+	'mm_attr_translatedfile'              => 'system/modules/metamodelsattribute_translatedfile/templates',
+));

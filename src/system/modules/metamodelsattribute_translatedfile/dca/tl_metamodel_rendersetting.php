@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The MetaModels extension allows the creation of multiple collections of custom items,
  * each with its own unique set of selectable attributes, with attribute extendability.
@@ -6,17 +7,13 @@
  * data in each collection.
  *
  * PHP version 5
- * @package	   MetaModels
- * @subpackage Backend
+ * @package    MetaModels
+ * @subpackage AttributeTranslatedFile
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
  */
-if (!defined('TL_ROOT'))
-{
-	die('You cannot access this file directly!');
-}
 
 $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['metapalettes']['translatedfile extends default'] = array
 (
@@ -61,5 +58,3 @@ $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_imageSize'] = a
 	'reference'               => &$GLOBALS['TL_LANG']['MSC'],
 	'eval'                    => array('rgxp'=>'digit', 'nospace'=>true, 'helpwizard'=>true, 'tl_class'=>'w50')
 );
-
-?>

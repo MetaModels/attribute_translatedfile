@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
  * The MetaModels extension allows the creation of multiple collections of custom items,
@@ -7,16 +7,16 @@
  * data in each collection.
  *
  * PHP version 5
- * @package     MetaModels
- * @subpackage  AttributeText
- * @author      Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @package    MetaModels
+ * @subpackage AttributeTranslatedFile
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
  */
 
 /**
- * This is the MetaModelAttribute class for handling translated long text fields.
+ * This is the MetaModelAttribute class for handling translated file fields.
  *
  * @package     MetaModels
  * @subpackage  AttributeText
@@ -129,18 +129,18 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 
 		$strIcon = 'system/themes/' . MetaModelController::getTheme() . '/images/' . $objFile->icon;
 		$arrSource = array
-		    (
-		    'file' => $strFile,
-		    'mtime' => $objFile->mtime,
-		    'alt' => $strAltText,
-		    'caption' => (strlen($arrMeta[2]) ? $arrMeta[2] : ''),
-		    'title' => $strBasename,
-		    'metafile' => $arrMeta,
-		    'icon' => $strIcon,
-		    'size' => $objFile->filesize,
-		    'sizetext' => sprintf('(%s)', MetaModelController::getReadableSize($objFile->filesize, 2)),
-		    'url' => Environment::getInstance()->request . (($GLOBALS['TL_CONFIG']['disableAlias'] || !$GLOBALS['TL_CONFIG']['rewriteURL']
-		    && count($_GET) || strlen($_GET['page'])) ? '&amp;' : '?') . 'file=' . MetaModelController::urlEncode($strFile)
+			(
+			'file' => $strFile,
+			'mtime' => $objFile->mtime,
+			'alt' => $strAltText,
+			'caption' => (strlen($arrMeta[2]) ? $arrMeta[2] : ''),
+			'title' => $strBasename,
+			'metafile' => $arrMeta,
+			'icon' => $strIcon,
+			'size' => $objFile->filesize,
+			'sizetext' => sprintf('(%s)', MetaModelController::getReadableSize($objFile->filesize, 2)),
+			'url' => Environment::getInstance()->request . (($GLOBALS['TL_CONFIG']['disableAlias'] || !$GLOBALS['TL_CONFIG']['rewriteURL']
+			&& count($_GET) || strlen($_GET['page'])) ? '&amp;' : '?') . 'file=' . MetaModelController::urlEncode($strFile)
 		);
 
 		// images
@@ -333,10 +333,10 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 	public function widgetToValue($varValue, $intId)
 	{
 		return array
-		    (
-		    'tstamp' => time(),
-		    'value' => $varValue,
-		    'att_id' => $this->get('id'),
+		(
+			'tstamp' => time(),
+			'value' => $varValue,
+			'att_id' => $this->get('id'),
 //			'langcode' => $strLangCode,
 //			'item_id' => $intId,
 		);
@@ -351,31 +351,31 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		if (is_array($arrValue['value']) && count($arrValue['value']) != 0)
 		{
 			$arrReturn = array(
-			    'tstamp' => time(),
-			    'value' => serialize($arrValue['value']),
-			    'att_id' => $this->get('id'),
-			    'langcode' => $strLangCode,
-			    'item_id' => $intId,
+				'tstamp' => time(),
+				'value' => serialize($arrValue['value']),
+				'att_id' => $this->get('id'),
+				'langcode' => $strLangCode,
+				'item_id' => $intId,
 			);
 		}
 		else if (!is_array($arrValue['value']) && strlen($arrValue['value']) != 0)
 		{
 			$arrReturn = array(
-			    'tstamp' => time(),
-			    'value' => $arrValue['value'],
-			    'att_id' => $this->get('id'),
-			    'langcode' => $strLangCode,
-			    'item_id' => $intId,
+				'tstamp' => time(),
+				'value' => $arrValue['value'],
+				'att_id' => $this->get('id'),
+				'langcode' => $strLangCode,
+				'item_id' => $intId,
 			);
 		}
 		else
 		{
 			$arrReturn = array(
-			    'tstamp' => time(),
-			    'value' => null,
-			    'att_id' => $this->get('id'),
-			    'langcode' => $strLangCode,
-			    'item_id' => $intId,
+			'tstamp' => time(),
+				'value' => null,
+				'att_id' => $this->get('id'),
+				'langcode' => $strLangCode,
+				'item_id' => $intId,
 			);
 		}
 
@@ -383,5 +383,3 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 	}
 
 }
-
-?>
