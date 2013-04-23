@@ -85,6 +85,25 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		$this->arrProcessed[] = $strPath;
 	}
 
+	/**
+	 * Generate an URL for downloading the given file.
+	 *
+	 * @param string $strFile The file that shall be downloaded.
+	 *
+	 * @return string
+	 */
+	public function getDownloadLink($strFile)
+	{
+		$strRequest = Environment::getInstance()->request;
+		if (($intPos = strpos($strRequest, '?')) !== false)
+		{
+			$strRequest = str_replace('?&', '?', preg_replace('/&?file=[^&]&*/', '', $strRequest));
+		}
+		$strRequest .= (strpos($strRequest, '?') === false ? '?' : '&');
+		$strRequest .= 'file=' . urlencode($strFile);
+		return $strRequest;
+	}
+
 	protected function renderFile($strFile, $objSettings, $strId)
 	{
 		if (!file_exists(TL_ROOT . '/' . $strFile))
@@ -130,17 +149,16 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		$strIcon = 'system/themes/' . MetaModelController::getTheme() . '/images/' . $objFile->icon;
 		$arrSource = array
 			(
-			'file' => $strFile,
-			'mtime' => $objFile->mtime,
-			'alt' => $strAltText,
-			'caption' => (strlen($arrMeta[2]) ? $arrMeta[2] : ''),
-			'title' => $strBasename,
+			'file'     => $strFile,
+			'mtime'    => $objFile->mtime,
+			'alt'      => $strAltText,
+			'caption'  => (strlen($arrMeta[2]) ? $arrMeta[2] : ''),
+			'title'    => $strBasename,
 			'metafile' => $arrMeta,
-			'icon' => $strIcon,
-			'size' => $objFile->filesize,
+			'icon'     => $strIcon,
+			'size'     => $objFile->filesize,
 			'sizetext' => sprintf('(%s)', MetaModelController::getReadableSize($objFile->filesize, 2)),
-			'url' => Environment::getInstance()->request . (($GLOBALS['TL_CONFIG']['disableAlias'] || !$GLOBALS['TL_CONFIG']['rewriteURL']
-			&& count($_GET) || strlen($_GET['page'])) ? '&amp;' : '?') . 'file=' . MetaModelController::urlEncode($strFile)
+			'url'      => specialchars($this->getDownloadLink($strFile))
 		);
 
 		// images
