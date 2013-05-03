@@ -21,8 +21,8 @@
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedfile extends _complexattribute_'] = array
 (
-        '+advanced' => array('file_showImage', 'file_customFiletree', 'file_multiple'),
-	'+backenddisplay'	=> array('-width50'),
+    '+advanced' => array('file_showImage', 'file_customFiletree', 'file_multiple'),
+	'+display'	=> array('-width50'),
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metasubpalettes']['file_customFiletree'] = array
