@@ -93,11 +93,11 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 	public function getAttributeSettingNames()
 	{
 		return array_merge(parent::getAttributeSettingNames(), array(
-			    'file_multiple',
-			    'file_customFiletree',
-			    'file_uploadFolder',
-			    'file_validFileTypes',
-			    'file_filesOnly',
+				'file_multiple',
+				'file_customFiletree',
+				'file_uploadFolder',
+				'file_validFileTypes',
+				'file_filesOnly',
 				'file_filePicker',
 			));
 	}
