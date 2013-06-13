@@ -98,6 +98,7 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 			    'file_uploadFolder',
 			    'file_validFileTypes',
 			    'file_filesOnly',
+				'file_filePicker',
 			));
 	}
 
@@ -127,6 +128,17 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 			{
 				$arrFieldDef['eval']['filesOnly'] = true;
 			}
+		}
+		
+		// Set all options for the file picker.
+		if($this->get('file_filePicker') && !$this->get('file_multiple'))
+		{
+			$arrFieldDef['inputType'] = 'text';
+			$arrFieldDef['eval']['tl_class'] .= ' wizard';
+			$arrFieldDef['wizard'] = array
+			(
+				array('TableMetaModelsAttributeTranslatedFile', 'filePicker')
+			);
 		}
 
 		return $arrFieldDef;
