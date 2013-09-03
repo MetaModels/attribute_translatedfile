@@ -15,6 +15,12 @@
  * @filesource
  */
 
+namespace MetaModels\Attribute\TranslatedFile;
+
+use MetaModels\Attribute\TranslatedReference;
+use MetaModels\Helper\ToolboxFile;
+use MetaModels\Render\Template;
+
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
  *
@@ -22,7 +28,7 @@
  * @subpackage  AttributeText
  * @author      Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
-class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedReference
+class TranslatedFile extends TranslatedReference
 {
 
 	protected $arrMeta = array();
@@ -31,6 +37,9 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 	protected $auxDate = array();
 	protected $multiSRC = array();
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function getValueTable()
 	{
 		return 'tl_metamodel_translatedlongblob';
@@ -38,9 +47,8 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 
 	/**
 	 * {@inheritdoc}
-	 *
 	 */
-	protected function prepareTemplate(MetaModelTemplate $objTemplate, $arrRowData, $objSettings = null)
+	protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings = null)
 	{
 		parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
@@ -86,32 +94,31 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		$objTemplate->src   = $arrData['source'];
 	}
 
-	/////////////////////////////////////////////////////////
-	// interface IMetaModelAttribute
-	/////////////////////////////////////////////////////////
-
+	/**
+	 * {@inheritdoc}
+	 */
 	public function getAttributeSettingNames()
 	{
 		return array_merge(parent::getAttributeSettingNames(), array(
-				'file_multiple',
-				'file_customFiletree',
-				'file_uploadFolder',
-				'file_validFileTypes',
-				'file_filesOnly',
-				'file_filePicker',
-			));
+			'file_multiple',
+			'file_customFiletree',
+			'file_uploadFolder',
+			'file_validFileTypes',
+			'file_filesOnly',
+			'file_filePicker',
+		));
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function getFieldDefinition($arrOverrides = array())
 	{
 		$arrFieldDef = parent::getFieldDefinition($arrOverrides);
 
-		$arrFieldDef['inputType'] = 'fileTree';
-
-		$arrFieldDef['eval']['files'] = true;
-
-		$arrFieldDef['eval']['fieldType'] = $this->get('file_multiple') ? 'checkbox' : 'radio';
-
+		$arrFieldDef['inputType']          = 'fileTree';
+		$arrFieldDef['eval']['files']      = true;
+		$arrFieldDef['eval']['fieldType']  = $this->get('file_multiple') ? 'checkbox' : 'radio';
 		$arrFieldDef['eval']['extensions'] = $GLOBALS['TL_CONFIG']['allowedDownload'];
 
 		if ($this->get('file_customFiletree'))
@@ -129,13 +136,13 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 				$arrFieldDef['eval']['filesOnly'] = true;
 			}
 		}
-		
+
 		// Set all options for the file picker.
 		if($this->get('file_filePicker') && !$this->get('file_multiple'))
 		{
-			$arrFieldDef['inputType'] = 'text';
+			$arrFieldDef['inputType']         = 'text';
 			$arrFieldDef['eval']['tl_class'] .= ' wizard';
-			$arrFieldDef['wizard'] = array
+			$arrFieldDef['wizard']            = array
 			(
 				array('TableMetaModelsAttributeTranslatedFile', 'filePicker')
 			);
@@ -161,40 +168,39 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		);
 	}
 
-	/////////////////////////////////////////////////////////////////
-	// interface IMetaModelAttributeTranslated
-	/////////////////////////////////////////////////////////////////
-
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function getSetValues($arrValue, $intId, $strLangCode)
 	{
 		if (is_array($arrValue['value']) && count($arrValue['value']) != 0)
 		{
 			$arrReturn = array(
-				'tstamp' => time(),
-				'value' => serialize($arrValue['value']),
-				'att_id' => $this->get('id'),
+				'tstamp'   => time(),
+				'value'    => serialize($arrValue['value']),
+				'att_id'   => $this->get('id'),
 				'langcode' => $strLangCode,
-				'item_id' => $intId,
+				'item_id'  => $intId,
 			);
 		}
 		else if (!is_array($arrValue['value']) && strlen($arrValue['value']) != 0)
 		{
 			$arrReturn = array(
-				'tstamp' => time(),
-				'value' => $arrValue['value'],
-				'att_id' => $this->get('id'),
+				'tstamp'   => time(),
+				'value'    => $arrValue['value'],
+				'att_id'   => $this->get('id'),
 				'langcode' => $strLangCode,
-				'item_id' => $intId,
+				'item_id'  => $intId,
 			);
 		}
 		else
 		{
 			$arrReturn = array(
-			'tstamp' => time(),
-				'value' => null,
-				'att_id' => $this->get('id'),
+				'tstamp'   => time(),
+				'value'    => null,
+				'att_id'   => $this->get('id'),
 				'langcode' => $strLangCode,
-				'item_id' => $intId,
+				'item_id'  => $intId,
 			);
 		}
 

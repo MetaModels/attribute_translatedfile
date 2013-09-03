@@ -21,7 +21,11 @@
  */
 ClassLoader::addClasses(array
 (
-	'MetaModelAttributeTranslatedFile'              => 'system/modules/metamodelsattribute_translatedfile/MetaModelAttributeTranslatedFile',
+	'MetaModels\Attribute\TranslatedFile\TranslatedFile' => 'system/modules/metamodelsattribute_translatedfile/MetaModels/Attribute/TranslatedFile/TranslatedFile.php',
+	'MetaModels\Dca\AttributeTranslatedFile'             => 'system/modules/metamodelsattribute_translatedfile/MetaModels/Dca/AttributeTranslatedFile.php',
+
+	'MetaModelAttributeTranslatedFile'                   => 'system/modules/metamodelsattribute_translatedfile/deprecated/MetaModelAttributeTranslatedFile.php',
+	'TableMetaModelsAttributeTranslatedFile'             => 'system/modules/metamodelsattribute_translatedfile/deprecated/TableMetaModelsAttributeTranslatedFile.php',
 ));
 
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The MetaModels extension allows the creation of multiple collections of custom items,
  * each with its own unique set of selectable attributes, with attribute extendability.
@@ -15,6 +14,11 @@
  * @filesource
  */
 
+namespace MetaModels\Dca;
+
+use DcGeneral\DataContainerInterface;
+use MetaModels\Helper\ContaoController;
+
 /**
  * Supplementary class for handling DCA information for translated file attributes.
  *
@@ -22,16 +26,18 @@
  * @subpackage AttributeTranslatedFile
  * @author     Stefan Heimes <cms@men-at-work.de>
  */
-class TableMetaModelsAttributeTranslatedFile extends Backend
+class AttributeTranslatedFile
 {
 	/**
 	 * Return the file picker wizard
-	 * @param DataContainer
+	 *
+	 * @param \DcGeneral\DataContainerInterface $dc
+	 *
 	 * @return string
 	 */
-	public function filePicker(DataContainer $dc)
+	public function filePicker(DataContainerInterface $dc)
 	{
-		$strField = 'ctrl_' . $dc->inputName . ((Input::getInstance()->get('act') == 'editAll') ? '_' . $dc->id : '');
-		return ' ' . $this->generateImage('pickfile.gif', $GLOBALS['TL_LANG']['MSC']['filepicker'], 'style="vertical-align:top;cursor:pointer" onclick="Backend.pickFile(\'' . $strField . '\')"');
+		$strField = 'ctrl_' . $dc->inputName . ((\Input::getInstance()->get('act') == 'editAll') ? '_' . $dc->id : '');
+		return ' ' . ContaoController::getInstance()->generateImage('pickfile.gif', $GLOBALS['TL_LANG']['MSC']['filepicker'], 'style="vertical-align:top;cursor:pointer" onclick="Backend.pickFile(\'' . $strField . '\')"');
 	}
 }
