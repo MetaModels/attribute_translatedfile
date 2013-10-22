@@ -111,6 +111,8 @@ class MetaModelAttributeTranslatedFile extends MetaModelAttributeTranslatedRefer
 		$arrFieldDef['eval']['files'] = true;
 
 		$arrFieldDef['eval']['fieldType'] = $this->get('file_multiple') ? 'checkbox' : 'radio';
+		
+		$arrFieldDef['eval']['multiple'] = $this->get('file_multiple') ? true : false;
 
 		$arrFieldDef['eval']['extensions'] = $GLOBALS['TL_CONFIG']['allowedDownload'];
 
