@@ -143,7 +143,9 @@ class TranslatedFile extends TranslatedReference
 				{
 					$arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
 				}
-			}else{
+			}
+			else
+			{
 				// contao 3 stores the pk of the folder so we had to convert them to work
 				if (strlen($this->get('file_uploadFolder')) && is_numeric($this->get('file_uploadFolder')))
 				{
