@@ -156,7 +156,6 @@ class TranslatedFile extends TranslatedReference
 				{
 					$arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
 				}
-
 			}
 			if (strlen($this->get('file_validFileTypes')))
 			{
