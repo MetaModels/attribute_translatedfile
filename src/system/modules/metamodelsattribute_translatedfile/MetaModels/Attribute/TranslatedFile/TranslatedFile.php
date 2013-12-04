@@ -270,11 +270,12 @@ class TranslatedFile extends TranslatedReference
 			foreach ($arrValues as $intId => $arrValue)
 			{
 				$arrValue['value']			 = deserialize($arrValue['value'], true);
-				$arrValues[$intId]['value']	 = (array) $arrValue['value'];
+				$arrValues[$intId]['value']	 = array();
 
-				foreach ((array) $arrValue['value'] as $intFiles)
+				foreach ((array) $arrValue['value'] as $mixFiles)
 				{
-					$arrValues[$intId]['path'][] = \FilesModel::findByPk($intFiles)->path;
+					$arrValues[$intId]['path'][]	 = \FilesModel::findByPk($mixFiles)->path;
+					$arrValues[$intId]['value'][]	 = (version_compare(VERSION, '3.2', '>=')) ? \String::binToUuid($mixFiles) : $mixFiles;
 				}
 			}
 		}
