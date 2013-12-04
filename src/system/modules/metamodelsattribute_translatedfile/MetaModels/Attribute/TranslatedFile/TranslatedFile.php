@@ -133,6 +133,7 @@ class TranslatedFile extends TranslatedReference
 		$arrFieldDef['inputType']          = 'fileTree';
 		$arrFieldDef['eval']['files']      = true;
 		$arrFieldDef['eval']['fieldType']  = $this->get('file_multiple') ? 'checkbox' : 'radio';
+		$arrFieldDef['eval']['multiple']   = $this->get('file_multiple') ? true : false;
 		$arrFieldDef['eval']['extensions'] = $GLOBALS['TL_CONFIG']['allowedDownload'];
 
 		if ($this->get('file_customFiletree'))
@@ -238,4 +239,33 @@ class TranslatedFile extends TranslatedReference
 
 		return $arrReturn;
 	}
+
+	/////////////////////////////////////////////////////////////////
+	// interface IMetaModelAttributeTranslated
+	/////////////////////////////////////////////////////////////////
+
+	/**
+	 * Get values for the given items in a certain language.
+	 */
+	public function getTranslatedDataFor($arrIds, $strLangCode)
+	{
+		$arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
+
+		if (version_compare(VERSION, '3.0', '>='))
+		{
+			foreach ($arrValues as $intId => $arrValue)
+			{
+				$arrValue['value']			 = deserialize($arrValue['value'], true);
+				$arrValues[$intId]['value']	 = (array) $arrValue['value'];
+
+				foreach ((array) $arrValue['value'] as $intFiles)
+				{
+					$arrValues[$intId]['path'][] = \FilesModel::findByPk($intFiles)->path;
+				}
+			}
+		}
+
+		return $arrValues;
+	}
+
 }
