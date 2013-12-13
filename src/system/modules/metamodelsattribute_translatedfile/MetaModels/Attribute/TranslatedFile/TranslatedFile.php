@@ -200,11 +200,32 @@ class TranslatedFile extends TranslatedReference
 
 	public function valueToWidget($varValue)
 	{
-		return deserialize($varValue['value']);
+		if (version_compare(VERSION, '3.0', '>='))
+		{
+
+			if (!$this->get('file_filePicker'))
+			{
+				return deserialize($varValue['value']);
+			}
+			$strValue = is_array($varValue['value']) ? $varValue['value'][0] : $varValue['value'];
+			
+			$objToolbox = new ToolboxFile();
+			return $objToolbox->convertValueToPath($strValue);
+		}
+		else
+		{
+			return deserialize($varValue['value']);
+		}
 	}
 
 	public function widgetToValue($varValue, $intId)
 	{
+		if (version_compare(VERSION, '3.0', '>=') && ($this->get('file_filePicker')))
+		{   
+			$objFile = \Dbafs::addResource($varValue);
+			$varValue = $objFile->id;
+		}
+		
 		return array
 		(
 			'tstamp' => time(),
