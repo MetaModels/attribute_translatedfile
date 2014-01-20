@@ -20,7 +20,7 @@ CREATE TABLE `tl_metamodel_translatedlongblob` (
   `value` longblob NULL,
   PRIMARY KEY  (`id`),
   KEY `attlang` (`att_id`, `langcode`),
-  KEY `attitem` (`att_id`, `item_id`),
+  KEY `attitem` (`att_id`, `item_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
@@ -33,7 +33,7 @@ CREATE TABLE `tl_metamodel_attribute` (
   `file_customFiletree` char(1) NOT NULL default '',
   `file_uploadFolder` blob NULL,
   `file_validFileTypes` varchar(255) NOT NULL default '',
-  `file_filesOnly` char(1) NOT NULL default '',
+  `file_filesOnly` char(1) NOT NULL default ''
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -44,5 +44,5 @@ CREATE TABLE `tl_metamodel_rendersetting` (
   `file_sortBy` varchar(32) NOT NULL default '',
   `file_showLink` char(1) NOT NULL default '',
   `file_showImage` char(1) NOT NULL default '',
-  `file_imageSize` varchar(255) NOT NULL default '',
+  `file_imageSize` varchar(255) NOT NULL default ''
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
