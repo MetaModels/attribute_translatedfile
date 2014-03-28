@@ -17,16 +17,6 @@
  */
 
 /**
- * Register the classes
- */
-ClassLoader::addClasses(array
-(
-	'MetaModels\Attribute\TranslatedFile\TranslatedFile' => 'system/modules/metamodelsattribute_translatedfile/MetaModels/Attribute/TranslatedFile/TranslatedFile.php',
-	'MetaModels\Dca\AttributeTranslatedFile'             => 'system/modules/metamodelsattribute_translatedfile/MetaModels/Dca/AttributeTranslatedFile.php',
-));
-
-
-/**
  * Register the templates
  */
 TemplateLoader::addFiles(array
