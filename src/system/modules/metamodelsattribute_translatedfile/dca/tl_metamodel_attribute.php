@@ -21,8 +21,8 @@
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedfile extends _complexattribute_'] = array
 (
-    '+advanced' => array('file_customFiletree', 'file_multiple'),
-	'+display'	=> array('-width50'),
+	'+advanced' => array('file_customFiletree', 'file_multiple'),
+	'+display'  => array('-width50'),
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metasubpalettes']['file_customFiletree'] = array
@@ -39,7 +39,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_customFiletree'] = 
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree'],
 	'inputType'               => 'checkbox',
-	'eval'                    => array('submitOnChange'=>true, 'tl_class'=>'w50')
+	'eval'                    => array('submitOnChange' => true, 'tl_class' => 'w50')
 );
 
 
@@ -47,7 +47,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_multiple'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_multiple'],
 	'inputType'               => 'checkbox',
-	'eval'                    => array('submitOnChange'=>true, 'tl_class'=>'w50')
+	'eval'                    => array('submitOnChange' => true, 'tl_class' => 'w50')
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_uploadFolder'] = array
@@ -55,26 +55,26 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_uploadFolder'] = ar
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder'],
 	'exclude'                 => true,
 	'inputType'               => 'fileTree',
-	'eval'                    => array('fieldType'=>'radio', 'tl_class'=>'clr')
+	'eval'                    => array('fieldType' => 'radio', 'tl_class' => 'clr')
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_validFileTypes'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes'],
 	'inputType'               => 'text',
-	'eval'                    => array('maxlength'=>255, 'tl_class'=>'w50')
+	'eval'                    => array('maxlength' => 255, 'tl_class' => 'w50')
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_filesOnly'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly'],
 	'inputType'               => 'checkbox',
-	'eval'                    => array('tl_class'=>'w50 m12')
+	'eval'                    => array('tl_class' => 'w50 m12')
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['file_filePicker'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filePicker'],
 	'inputType'               => 'checkbox',
-	'eval'                    => array('tl_class'=>'w50')
+	'eval'                    => array('tl_class' => 'w50')
 );

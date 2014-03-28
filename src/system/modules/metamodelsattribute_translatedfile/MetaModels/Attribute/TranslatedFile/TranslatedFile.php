@@ -30,13 +30,6 @@ use MetaModels\Render\Template;
  */
 class TranslatedFile extends TranslatedReference
 {
-
-	protected $arrMeta = array();
-	protected $arrAux = array();
-	protected $arrProcessed = array();
-	protected $auxDate = array();
-	protected $multiSRC = array();
-
 	/**
 	 * {@inheritdoc}
 	 */
@@ -88,7 +81,7 @@ class TranslatedFile extends TranslatedReference
 					}
 				}
 			}
-			else if (is_array($arrRowData[$this->getColName()]))
+			elseif (is_array($arrRowData[$this->getColName()]))
 			{
 				foreach ($arrRowData[$this->getColName()] as $strFile)
 				{
@@ -154,13 +147,14 @@ class TranslatedFile extends TranslatedReference
 		{
 			if (strlen($this->get('file_uploadFolder')))
 			{
-				// set root path of file chooser depending on contao version
+				// Set root path of file chooser depending on contao version.
 				if (version_compare(VERSION, '3.0', '<'))
 				{
 					$arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
 				}
 				else
 				{
+					$objFile = null;
 					// Contao 3.1.x use the numeric values.
 					if (is_numeric($this->get('file_uploadFolder')))
 					{
@@ -196,7 +190,7 @@ class TranslatedFile extends TranslatedReference
 		}
 
 		// Set all options for the file picker.
-		if($this->get('file_filePicker') && !$this->get('file_multiple'))
+		if ($this->get('file_filePicker') && !$this->get('file_multiple'))
 		{
 			$arrFieldDef['inputType']         = 'text';
 			$arrFieldDef['eval']['tl_class'] .= ' wizard';
@@ -209,6 +203,9 @@ class TranslatedFile extends TranslatedReference
 		return $arrFieldDef;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function valueToWidget($varValue)
 	{
 		if (version_compare(VERSION, '3.0', '>='))
@@ -219,31 +216,30 @@ class TranslatedFile extends TranslatedReference
 				return deserialize($varValue['value']);
 			}
 			$strValue = is_array($varValue['value']) ? $varValue['value'][0] : $varValue['value'];
-			
+
 			$objToolbox = new ToolboxFile();
 			return $objToolbox->convertValueToPath($strValue);
 		}
-		else
-		{
-			return deserialize($varValue['value']);
-		}
+
+		return deserialize($varValue['value']);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function widgetToValue($varValue, $intId)
 	{
 		if (version_compare(VERSION, '3.0', '>=') && ($this->get('file_filePicker')))
-		{   
-			$objFile = \Dbafs::addResource($varValue);
+		{
+			$objFile  = \Dbafs::addResource($varValue);
 			$varValue = $objFile->id;
 		}
-		
+
 		return array
 		(
 			'tstamp' => time(),
 			'value' => $varValue,
 			'att_id' => $this->get('id'),
-//			'langcode' => $strLangCode,
-//			'item_id' => $intId,
 		);
 	}
 
@@ -262,7 +258,7 @@ class TranslatedFile extends TranslatedReference
 				'item_id'  => $intId,
 			);
 		}
-		else if (!is_array($arrValue['value']) && strlen($arrValue['value']) != 0)
+		elseif (!is_array($arrValue['value']) && strlen($arrValue['value']) != 0)
 		{
 			$arrReturn = array(
 				'tstamp'   => time(),
@@ -286,12 +282,8 @@ class TranslatedFile extends TranslatedReference
 		return $arrReturn;
 	}
 
-	/////////////////////////////////////////////////////////////////
-	// interface IMetaModelAttributeTranslated
-	/////////////////////////////////////////////////////////////////
-
 	/**
-	 * Get values for the given items in a certain language.
+	 * {@inheritDoc}
 	 */
 	public function getTranslatedDataFor($arrIds, $strLangCode)
 	{
@@ -301,18 +293,20 @@ class TranslatedFile extends TranslatedReference
 		{
 			foreach ($arrValues as $intId => $arrValue)
 			{
-				$arrValue['value']			 = deserialize($arrValue['value'], true);
-				$arrValues[$intId]['value']	 = array();
+				$arrValue['value']          = deserialize($arrValue['value'], true);
+				$arrValues[$intId]['value'] = array();
 
-				foreach ((array) $arrValue['value'] as $mixFiles)
+				foreach ((array)$arrValue['value'] as $mixFiles)
 				{
-					$arrValues[$intId]['path'][]	 = \FilesModel::findByPk($mixFiles)->path;
-					$arrValues[$intId]['value'][]	 = (version_compare(VERSION, '3.2', '>=')) ? \String::binToUuid($mixFiles) : $mixFiles;
+					$arrValues[$intId]['path'][]  = \FilesModel::findByPk($mixFiles)->path;
+					$arrValues[$intId]['value'][] =
+						(version_compare(VERSION, '3.2', '>='))
+						? \String::binToUuid($mixFiles)
+						: $mixFiles;
 				}
 			}
 		}
 
 		return $arrValues;
 	}
-
 }
