@@ -8,11 +8,13 @@
  *
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  *
- * last-updated: 2014-05-08T08:14:41+02:00
+ * last-updated: 2014-05-09T16:15:01+02:00
  */
 
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['0']      = 'Passen Sie den Dateibaum an.';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['1']      = 'Erlaubt Ihnen, individuelle Optionen für den Dateibaum zu setzen.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filePicker']['0']          = 'Dateipicker benutzen';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filePicker']['1']          = 'Falls angewählt wird der Dateipicker anstelle des Dateibaums benutzt.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['0']           = 'Nur Dateien erlauben';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['1']           = 'Wählen Sie diese Option, um die Auswahl auf Einzeldateien zu beschränken und die Auswahl kompletter Ordner zu verhindern.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_multiple']['0']            = 'Mehrfachauswahl';
