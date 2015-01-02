@@ -8,7 +8,10 @@
  * PHP version 5
  * @package     MetaModels
  * @subpackage  AttributeTranslatedFile
- * @author      Stefan Heimes <cms@men-at-work.de>
+ * @author      Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @author      Stefan heimes <stefan_heimes@hotmail.com>
+ * @author      David Maack <david.maack@arcor.de>
+ * @author      David Greminger <david.greminger@1up.io>
  * @copyright   The MetaModels team.
  * @license     LGPL.
  * @filesource

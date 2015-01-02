@@ -10,7 +10,8 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedFile
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     Andreas Isaak <info@andreas-isaak.de>
+ * @author     Andreas Isaak <andy.jared@googlemail.com>
+ * @author     David Greminger <david.greminger@1up.io>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
