@@ -21,4 +21,3 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Tips da datotecas valids';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Endatescha ina glista seperada entras commas dad extensiuns da datotecas validas per quest champ.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'Datoteca translatada';
-

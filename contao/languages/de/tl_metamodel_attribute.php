@@ -24,4 +24,3 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Gültige Dateitypen';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Bitte geben Sie eine Liste gültiger Dateitypen ein. Die Liste besteht aus kommagetrennten Werten.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'Übersetzte Datei';
-

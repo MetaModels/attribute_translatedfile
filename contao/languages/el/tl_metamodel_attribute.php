@@ -21,4 +21,3 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Έγκυροι τύποι αρχείων ';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Παρακαλώ εισάγετε μια λίστα χωρισμένη με κόμμα των επεκτάσεων των έγκυρων τύπων αρχείων για αυτό το πεδίο ';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'Μεταφρασμενο αρχειο';
-

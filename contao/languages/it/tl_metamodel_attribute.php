@@ -21,4 +21,3 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Tipologia file validi';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Inserire i tipi di file che si vuole visualizzare. Utilizzare il simbolo pipe come separatore.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'File tradotto';
-

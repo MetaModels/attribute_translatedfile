@@ -20,4 +20,4 @@ $GLOBALS['METAMODELS']['attributes']['translatedfile']['image'] = 'system/module
 
 // non composerized Contao 2.X autoload support.
 $GLOBALS['MM_AUTOLOAD'][] = dirname(__DIR__);
-$GLOBALS['MM_AUTOLOAD'][] = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'deprecated';
+$GLOBALS['MM_AUTOLOAD'][] = dirname(__DIR__).DIRECTORY_SEPARATOR.'deprecated';
