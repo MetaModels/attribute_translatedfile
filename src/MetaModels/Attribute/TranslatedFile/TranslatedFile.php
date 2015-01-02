@@ -40,6 +40,7 @@ class TranslatedFile extends TranslatedReference
 
     /**
      * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings = null)
     {
@@ -113,6 +114,8 @@ class TranslatedFile extends TranslatedReference
 
     /**
      * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function getFieldDefinition($arrOverrides = array())
     {
@@ -122,7 +125,7 @@ class TranslatedFile extends TranslatedReference
         $arrFieldDef['eval']['files']      = true;
         $arrFieldDef['eval']['fieldType']  = $this->get('file_multiple') ? 'checkbox' : 'radio';
         $arrFieldDef['eval']['multiple']   = $this->get('file_multiple') ? true : false;
-        $arrFieldDef['eval']['extensions'] = $GLOBALS['TL_CONFIG']['allowedDownload'];
+        $arrFieldDef['eval']['extensions'] = $this->getAllowedDownloadTypes();
 
         if ($this->get('file_customFiletree')) {
             if (strlen($this->get('file_uploadFolder'))) {
@@ -134,18 +137,14 @@ class TranslatedFile extends TranslatedReference
                     // Contao 3.1.x use the numeric values.
                     if (is_numeric($this->get('file_uploadFolder'))) {
                         $objFile = \FilesModel::findByPk($this->get('file_uploadFolder'));
-                    }
-                    // If not numeric we have a Contao 3.2.x with a binary uuid value.
-                    elseif (strlen($this->get('file_uploadFolder')) == 16) {
+                    } elseif (strlen($this->get('file_uploadFolder')) == 16) {
                         $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
                     }
 
                     // Check if we have a file.
                     if ($objFile != null) {
                         $arrFieldDef['eval']['path'] = $objFile->path;
-                    }
-                    // Fallback.
-                    else {
+                    } else {
                         $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
                     }
                 }
@@ -264,5 +263,18 @@ class TranslatedFile extends TranslatedReference
         }
 
         return $arrValues;
+    }
+
+    /**
+     * Returns the METAMODELS_SYSTEM_COLUMNS (replacement for super globals access).
+     *
+     * @return array METAMODELS_SYSTEM_COLUMNS
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     */
+    public function getAllowedDownloadTypes()
+    {
+        return $GLOBALS['TL_CONFIG']['allowedDownload'];
     }
 }

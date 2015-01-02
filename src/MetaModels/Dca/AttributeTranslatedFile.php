@@ -16,7 +16,7 @@
 
 namespace MetaModels\Dca;
 
-use ContaoCommunityAlliance\DcGeneral\DataContainerInterface;
+use ContaoCommunityAlliance\DcGeneral\dcInterface;
 use MetaModels\Helper\ContaoController;
 
 /**
@@ -31,11 +31,15 @@ class AttributeTranslatedFile
     /**
      * Return the file picker wizard.
      *
-     * @param DataContainerInterface $dc The data container.
+     * @param dcInterface $dc The data container.
      *
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.ShortVariable)
      */
-    public function filePicker(DataContainerInterface $dc)
+    public function filePicker(dcInterface $dc)
     {
         if (version_compare(VERSION, '3.1', '>=')) {
             $currentField = $dc->getEnvironment()->getCurrentModel()->getItem()->get($dc->field);
