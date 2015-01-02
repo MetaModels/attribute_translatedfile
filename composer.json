@@ -38,26 +38,26 @@
 		"source":"https://github.com/MetaModels/attribute_translatedfile"
 	},
 	"require":{
-        "php":">=5.3",
-        "contao/core": ">=3.2,<3.5",
-        "contao-community-alliance/composer-plugin": "~2.0",
-        "metamodels/core": "~2.0"
+		"php":">=5.3",
+		"contao/core": ">=3.2,<3.5",
+		"contao-community-alliance/composer-plugin": "~2.0",
+		"metamodels/core": "~2.0"
 	},
 	"require-dev": {
-        "cyberspectrum/contao-toolbox": "dev-master",
-        "contao-community-alliance/build-system": "~1.0",
-        "contao-community-alliance/build-system-all-tasks": "~1.0",
-        "contao-community-alliance/coding-standard": "~1.0",
-        "metamodels/base-unit-tests": "~1.0"
+		"cyberspectrum/contao-toolbox": "dev-master",
+		"contao-community-alliance/build-system": "~1.0",
+		"contao-community-alliance/build-system-all-tasks": "~1.0",
+		"contao-community-alliance/coding-standard": "~1.0",
+		"metamodels/base-unit-tests": "~1.0"
 	},
 	"conflict": {
 		"contao/core": "3.4.0"
 	},
-    "autoload": {
-        "psr-0": {
-            "MetaModels": "src/"
-        }
-    },
+	"autoload": {
+		"psr-0": {
+			"MetaModels": "src/"
+		}
+	},
 	"extra":{
 		"contao": {
 			"symlinks":{
@@ -74,6 +74,6 @@
 			"dev-tng": "2.0.x-dev"
 		}
 	},
-    "minimum-stability": "dev",
-    "prefer-stable": true
+	"minimum-stability": "dev",
+	"prefer-stable": true
 }
