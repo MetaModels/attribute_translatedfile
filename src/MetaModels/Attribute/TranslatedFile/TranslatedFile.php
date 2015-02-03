@@ -45,7 +45,6 @@ class TranslatedFile extends TranslatedReference
 
     /**
      * {@inheritdoc}
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings = null)
     {
@@ -72,26 +71,14 @@ class TranslatedFile extends TranslatedReference
         if ($arrRowData[$this->getColName()]) {
             if (isset($arrRowData[$this->getColName()]['value'])) {
                 foreach ($arrRowData[$this->getColName()]['value'] as $strFile) {
-                    if (version_compare(VERSION, '3.0', '<')) {
-                        $objToolbox->addPath($strFile);
-                    } else {
-                        $objToolbox->addPathById($strFile);
-                    }
+                    $objToolbox->addPathById($strFile);
                 }
             } elseif (is_array($arrRowData[$this->getColName()])) {
                 foreach ($arrRowData[$this->getColName()] as $strFile) {
-                    if (version_compare(VERSION, '3.0', '<')) {
-                        $objToolbox->addPath($strFile);
-                    } else {
-                        $objToolbox->addPathById($strFile);
-                    }
+                    $objToolbox->addPathById($strFile);
                 }
             } else {
-                if (version_compare(VERSION, '3.0', '<')) {
-                    $objToolbox->addPath($arrRowData[$this->getColName()]);
-                } else {
-                    $objToolbox->addPathById($arrRowData[$this->getColName()]);
-                }
+                $objToolbox->addPathById($arrRowData[$this->getColName()]);
             }
         }
 
@@ -119,8 +106,6 @@ class TranslatedFile extends TranslatedReference
 
     /**
      * {@inheritdoc}
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function getFieldDefinition($arrOverrides = array())
     {
@@ -135,23 +120,19 @@ class TranslatedFile extends TranslatedReference
         if ($this->get('file_customFiletree')) {
             if (strlen($this->get('file_uploadFolder'))) {
                 // Set root path of file chooser depending on contao version.
-                if (version_compare(VERSION, '3.0', '<')) {
-                    $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
-                } else {
-                    $objFile = null;
-                    // Contao 3.1.x use the numeric values.
-                    if (is_numeric($this->get('file_uploadFolder'))) {
-                        $objFile = \FilesModel::findByPk($this->get('file_uploadFolder'));
-                    } elseif (strlen($this->get('file_uploadFolder')) == 16) {
-                        $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
-                    }
+                $objFile = null;
+                // Contao 3.1.x use the numeric values.
+                if (is_numeric($this->get('file_uploadFolder'))) {
+                    $objFile = \FilesModel::findByPk($this->get('file_uploadFolder'));
+                } elseif (strlen($this->get('file_uploadFolder')) == 16) {
+                    $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
+                }
 
-                    // Check if we have a file.
-                    if ($objFile != null) {
-                        $arrFieldDef['eval']['path'] = $objFile->path;
-                    } else {
-                        $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
-                    }
+                // Check if we have a file.
+                if ($objFile != null) {
+                    $arrFieldDef['eval']['path'] = $objFile->path;
+                } else {
+                    $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
                 }
             }
 
@@ -180,26 +161,22 @@ class TranslatedFile extends TranslatedReference
      */
     public function valueToWidget($varValue)
     {
-        if (version_compare(VERSION, '3.0', '>=')) {
-            if (!$this->get('file_filePicker')) {
-                return deserialize($varValue['value']);
-            }
-            $strValue = is_array($varValue['value']) ? $varValue['value'][0] : $varValue['value'];
-
-            $objToolbox = new ToolboxFile();
-
-            return $objToolbox->convertValueToPath($strValue);
+        if (!$this->get('file_filePicker')) {
+            return deserialize($varValue['value']);
         }
+        $strValue = is_array($varValue['value']) ? $varValue['value'][0] : $varValue['value'];
 
-        return deserialize($varValue['value']);
+        $objToolbox = new ToolboxFile();
+
+        return $objToolbox->convertValueToPath($strValue);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function widgetToValue($varValue, $intId)
+    public function widgetToValue($varValue, $itemId)
     {
-        if (version_compare(VERSION, '3.0', '>=') && ($this->get('file_filePicker'))) {
+        if ($this->get('file_filePicker')) {
             $objFile  = \Dbafs::addResource($varValue);
             $varValue = $objFile->id;
         }
@@ -252,18 +229,13 @@ class TranslatedFile extends TranslatedReference
     {
         $arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
 
-        if (version_compare(VERSION, '3.0', '>=')) {
-            foreach ($arrValues as $intId => $arrValue) {
-                $arrValue['value']          = deserialize($arrValue['value'], true);
-                $arrValues[$intId]['value'] = array();
+        foreach ($arrValues as $intId => $arrValue) {
+            $arrValue['value']          = deserialize($arrValue['value'], true);
+            $arrValues[$intId]['value'] = array();
 
-                foreach ((array) $arrValue['value'] as $mixFiles) {
-                    $arrValues[$intId]['path'][]  = \FilesModel::findByPk($mixFiles)->path;
-                    $arrValues[$intId]['value'][] =
-                        (version_compare(VERSION, '3.2', '>='))
-                        ? \String::binToUuid($mixFiles)
-                        : $mixFiles;
-                }
+            foreach ((array) $arrValue['value'] as $mixFiles) {
+                $arrValues[$intId]['path'][]  = \FilesModel::findByPk($mixFiles)->path;
+                $arrValues[$intId]['value'][] = \String::binToUuid($mixFiles);
             }
         }
 
