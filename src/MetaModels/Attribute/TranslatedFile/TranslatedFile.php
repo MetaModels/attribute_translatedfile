@@ -56,7 +56,14 @@ class TranslatedFile extends TranslatedReference
 
         $objToolbox->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage());
 
-        $objToolbox->setLightboxId($this->getMetaModel()->getTableName().'.'.$objSettings->id.'.'.$arrRowData['id']);
+        $objToolbox->setLightboxId(
+            sprintf(
+                '%s.%s.%s',
+                $this->getMetaModel()->getTableName(),
+                $objSettings->id,
+                $arrRowData['id']
+            )
+        );
 
         if (strlen($this->get('file_validFileTypes'))) {
             $objToolbox->setAcceptedExtensions($this->get('file_validFileTypes'));
