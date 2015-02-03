@@ -46,7 +46,7 @@ class TranslatedFile extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings = null)
+    protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
     {
         parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
