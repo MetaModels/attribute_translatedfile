@@ -22,7 +22,9 @@
 
 namespace MetaModels\Attribute\TranslatedFile;
 
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
 use MetaModels\Attribute\TranslatedReference;
+use MetaModels\DcGeneral\Events\TranslatedFileWizardHandler;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\Render\Template;
 
@@ -60,7 +62,7 @@ class TranslatedFile extends TranslatedReference
             sprintf(
                 '%s.%s.%s',
                 $this->getMetaModel()->getTableName(),
-                $objSettings->id,
+                $objSettings->get('id'),
                 $arrRowData['id']
             )
         );
@@ -112,6 +114,41 @@ class TranslatedFile extends TranslatedReference
     }
 
     /**
+     * Manipulate the field definition for custom file trees.
+     *
+     * @param array $arrFieldDef The field definition to manipulate.
+     *
+     * @return void
+     */
+    private function handleCustomFileTree(&$arrFieldDef)
+    {
+        if (strlen($this->get('file_uploadFolder'))) {
+            // Set root path of file chooser depending on contao version.
+            $objFile = null;
+
+            if (\Validator::isStringUuid($this->get('file_uploadFolder'))) {
+                $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
+            }
+
+            // Check if we have a file.
+            if ($objFile != null) {
+                $arrFieldDef['eval']['path'] = $objFile->path;
+            } else {
+                // Fallback.
+                $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
+            }
+        }
+
+        if (strlen($this->get('file_validFileTypes'))) {
+            $arrFieldDef['eval']['extensions'] = $this->get('file_validFileTypes');
+        }
+
+        if (strlen($this->get('file_filesOnly'))) {
+            $arrFieldDef['eval']['filesOnly'] = true;
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getFieldDefinition($arrOverrides = array())
@@ -120,43 +157,28 @@ class TranslatedFile extends TranslatedReference
 
         $arrFieldDef['inputType']          = 'fileTree';
         $arrFieldDef['eval']['files']      = true;
-        $arrFieldDef['eval']['fieldType']  = $this->get('file_multiple') ? 'checkbox' : 'radio';
-        $arrFieldDef['eval']['multiple']   = $this->get('file_multiple') ? true : false;
-        $arrFieldDef['eval']['extensions'] = $this->getAllowedDownloadTypes();
+        $arrFieldDef['eval']['extensions'] = \Config::get('allowedDownload');
+        $arrFieldDef['eval']['multiple']   = (bool) $this->get('file_multiple');
+
+        if ($this->get('file_multiple')) {
+            $arrFieldDef['eval']['fieldType'] = 'checkbox';
+        } else {
+            $arrFieldDef['eval']['fieldType'] = 'radio';
+        }
 
         if ($this->get('file_customFiletree')) {
-            if (strlen($this->get('file_uploadFolder'))) {
-                // Set root path of file chooser depending on contao version.
-                $objFile = null;
-                // Contao 3.1.x use the numeric values.
-                if (is_numeric($this->get('file_uploadFolder'))) {
-                    $objFile = \FilesModel::findByPk($this->get('file_uploadFolder'));
-                } elseif (strlen($this->get('file_uploadFolder')) == 16) {
-                    $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
-                }
-
-                // Check if we have a file.
-                if ($objFile != null) {
-                    $arrFieldDef['eval']['path'] = $objFile->path;
-                } else {
-                    $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
-                }
-            }
-
-            if (strlen($this->get('file_validFileTypes'))) {
-                $arrFieldDef['eval']['extensions'] = $this->get('file_validFileTypes');
-            }
-            if (strlen($this->get('file_filesOnly'))) {
-                $arrFieldDef['eval']['filesOnly'] = true;
-            }
+            $this->handleCustomFileTree($arrFieldDef);
         }
 
         // Set all options for the file picker.
-        if ($this->get('file_filePicker') && !$this->get('file_multiple')) {
+        if (version_compare(VERSION, '3.3', '<') && $this->get('file_filePicker') && !$this->get('file_multiple')) {
             $arrFieldDef['inputType']         = 'text';
             $arrFieldDef['eval']['tl_class'] .= ' wizard';
-            $arrFieldDef['wizard']            = array(
-                array('TableMetaModelsAttributeTranslatedFile', 'filePicker'),
+
+            $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
+            $dispatcher->addListener(
+                ManipulateWidgetEvent::NAME,
+                array(new TranslatedFileWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard')
             );
         }
 
@@ -247,18 +269,5 @@ class TranslatedFile extends TranslatedReference
         }
 
         return $arrValues;
-    }
-
-    /**
-     * Returns the METAMODELS_SYSTEM_COLUMNS (replacement for super globals access).
-     *
-     * @return array METAMODELS_SYSTEM_COLUMNS
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
-     */
-    public function getAllowedDownloadTypes()
-    {
-        return $GLOBALS['TL_CONFIG']['allowedDownload'];
     }
 }
