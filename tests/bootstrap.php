@@ -8,6 +8,7 @@
  * PHP version 5
  * @package    MetaModels
  * @subpackage Tests
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     David Greminger <david.greminger@1up.io>
  * @copyright  The MetaModels team.
  * @license    LGPL.
@@ -31,5 +32,3 @@ if (
         'php composer.phar install'.PHP_EOL;
     exit(1);
 }
-
-$loader->add('MetaModels\Test', __DIR__);
