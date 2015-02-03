@@ -20,7 +20,3 @@
 
 $GLOBALS['METAMODELS']['attributes']['translatedfile']['class'] = 'MetaModels\Attribute\TranslatedFile\TranslatedFile';
 $GLOBALS['METAMODELS']['attributes']['translatedfile']['image'] = 'system/modules/metamodelsattribute_translatedfile/html/file.png';
-
-// non composerized Contao 2.X autoload support.
-$GLOBALS['MM_AUTOLOAD'][] = dirname(__DIR__);
-$GLOBALS['MM_AUTOLOAD'][] = dirname(__DIR__).DIRECTORY_SEPARATOR.'deprecated';
