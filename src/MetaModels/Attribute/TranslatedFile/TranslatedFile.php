@@ -126,7 +126,7 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $objFile = null;
 
-            if (\Validator::isStringUuid($this->get('file_uploadFolder'))) {
+            if (\Validator::isStringUuid($this->get('file_uploadFolder')) || \Validator::isBinaryUuid($this->get('file_uploadFolder'))) {
                 $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
             }
 
