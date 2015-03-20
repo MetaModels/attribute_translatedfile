@@ -15,6 +15,7 @@
  * @author     cogizz <info@cogizz.de>
  * @author     David Maack <david.maack@arcor.de>
  * @author     David Greminger <david.greminger@1up.io>
+ * @author     Andreas Nölke <zero@brothers-project.de>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
@@ -126,7 +127,9 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $objFile = null;
 
-            if (\Validator::isStringUuid($this->get('file_uploadFolder')) || \Validator::isBinaryUuid($this->get('file_uploadFolder'))) {
+            if (\Validator::isStringUuid($this->get('file_uploadFolder'))
+                || \Validator::isBinaryUuid($this->get('file_uploadFolder'))
+            ) {
                 $objFile = \FilesModel::findByUuid($this->get('file_uploadFolder'));
             }
 
