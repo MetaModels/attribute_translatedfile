@@ -193,14 +193,22 @@ class TranslatedFile extends TranslatedReference
      */
     public function valueToWidget($varValue)
     {
-        if (!$this->get('file_filePicker')) {
-            return deserialize($varValue['value']);
+
+        if (empty($varValue)) {
+            return null;
         }
-        $strValue = is_array($varValue['value']) ? $varValue['value'][0] : $varValue['value'];
+        $varValue = $varValue['value'];
 
-        $objToolbox = new ToolboxFile();
+        // From 3.3 on the file picker is mandatory.
+        if (version_compare(VERSION, '3.3', '>=') || !$this->get('file_filePicker')) {
+            return $this->get('file_multiple') ? $varValue['bin'] : $varValue['bin'][0];
+        }
 
-        return $objToolbox->convertValueToPath($strValue);
+        if ($this->get('file_filePicker')) {
+            return $varValue['path'][0];
+        }
+
+        return $varValue['path'];
     }
 
     /**
@@ -208,16 +216,30 @@ class TranslatedFile extends TranslatedReference
      */
     public function widgetToValue($varValue, $itemId)
     {
-        if ($this->get('file_filePicker')) {
-            $objFile  = \Dbafs::addResource($varValue);
-            $varValue = $objFile->id;
-        }
-
         return array(
             'tstamp' => time(),
-            'value' => $varValue,
+            'value' => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
             'att_id' => $this->get('id'),
         );
+    }
+
+    /**
+     * Take the native data and serialize it for the database.
+     *
+     * @param mixed $mixValues The data to serialize.
+     *
+     * @return string An serialized array with binary data or a binary data.
+     */
+    private function convert($mixValues)
+    {
+        $data = ToolboxFile::convertValuesToDatabase($mixValues);
+
+        // Check single file or multiple file.
+        if ($this->get('file_multiple')) {
+            return serialize($data);
+        }
+
+        return isset($data[0]) ? $data[0] : null;
     }
 
     /**
@@ -225,24 +247,8 @@ class TranslatedFile extends TranslatedReference
      */
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
-        if (is_array($arrValue['value']) && count($arrValue['value']) != 0) {
-            $arrReturn = array(
-                'tstamp'   => time(),
-                'value'    => serialize($arrValue['value']),
-                'att_id'   => $this->get('id'),
-                'langcode' => $strLangCode,
-                'item_id'  => $intId,
-            );
-        } elseif (!is_array($arrValue['value']) && strlen($arrValue['value']) != 0) {
-            $arrReturn = array(
-                'tstamp'   => time(),
-                'value'    => $arrValue['value'],
-                'att_id'   => $this->get('id'),
-                'langcode' => $strLangCode,
-                'item_id'  => $intId,
-            );
-        } else {
-            $arrReturn = array(
+        if (empty($arrValue)) {
+            return array(
                 'tstamp'   => time(),
                 'value'    => null,
                 'att_id'   => $this->get('id'),
@@ -251,7 +257,13 @@ class TranslatedFile extends TranslatedReference
             );
         }
 
-        return $arrReturn;
+        return array(
+            'tstamp'   => time(),
+            'value'    => $this->convert($arrValue['value']),
+            'att_id'   => $this->get('id'),
+            'langcode' => $strLangCode,
+            'item_id'  => $intId,
+        );
     }
 
     /**
@@ -262,13 +274,9 @@ class TranslatedFile extends TranslatedReference
         $arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
 
         foreach ($arrValues as $intId => $arrValue) {
-            $arrValue['value']          = deserialize($arrValue['value'], true);
-            $arrValues[$intId]['value'] = array();
-
-            foreach ((array) $arrValue['value'] as $mixFiles) {
-                $arrValues[$intId]['path'][]  = \FilesModel::findByPk($mixFiles)->path;
-                $arrValues[$intId]['value'][] = \String::binToUuid($mixFiles);
-            }
+            $arrValues[$intId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
+                deserialize($arrValue['value'], true)
+            );
         }
 
         return $arrValues;
