@@ -23,9 +23,7 @@
 
 namespace MetaModels\Attribute\TranslatedFile;
 
-use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
 use MetaModels\Attribute\TranslatedReference;
-use MetaModels\DcGeneral\Events\TranslatedFileWizardHandler;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\Render\Template;
 
@@ -110,7 +108,6 @@ class TranslatedFile extends TranslatedReference
             'file_uploadFolder',
             'file_validFileTypes',
             'file_filesOnly',
-            'file_filePicker',
         ));
     }
 
@@ -173,18 +170,6 @@ class TranslatedFile extends TranslatedReference
             $this->handleCustomFileTree($arrFieldDef);
         }
 
-        // Set all options for the file picker.
-        if (version_compare(VERSION, '3.3', '<') && $this->get('file_filePicker') && !$this->get('file_multiple')) {
-            $arrFieldDef['inputType']         = 'text';
-            $arrFieldDef['eval']['tl_class'] .= ' wizard';
-
-            $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-            $dispatcher->addListener(
-                ManipulateWidgetEvent::NAME,
-                array(new TranslatedFileWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard')
-            );
-        }
-
         return $arrFieldDef;
     }
 
@@ -193,22 +178,15 @@ class TranslatedFile extends TranslatedReference
      */
     public function valueToWidget($varValue)
     {
-
         if (empty($varValue)) {
             return null;
         }
-        $varValue = $varValue['value'];
 
-        // From 3.3 on the file picker is mandatory.
-        if (version_compare(VERSION, '3.3', '>=') || !$this->get('file_filePicker')) {
-            return $this->get('file_multiple') ? $varValue['bin'] : $varValue['bin'][0];
+        if (!$this->get('file_multiple')) {
+            return isset($varValue['bin'][0]) ? $varValue['bin'][0] : null;
         }
 
-        if ($this->get('file_filePicker')) {
-            return $varValue['path'][0];
-        }
-
-        return $varValue['path'];
+        return $varValue['bin'];
     }
 
     /**

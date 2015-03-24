@@ -24,4 +24,3 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']   = array('Se
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes'] = array('Valid file types', 'Please enter a comma separated list of extensions of valid file types for this field.');
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']      = array('Allow files only', 'Select this option to restrict the file browser to files only (folders not selectable).');
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_multiple']       = array('Multiple selection', 'If selected, user will be able to select more than one item.');
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filePicker']     = array('Use file picker', 'If selected, use the file picker instead of the filetree.');
