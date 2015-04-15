@@ -178,15 +178,15 @@ class TranslatedFile extends TranslatedReference
      */
     public function valueToWidget($varValue)
     {
-        if (empty($varValue)) {
+        if (empty($varValue) || empty($varValue['value'])) {
             return null;
         }
 
         if (!$this->get('file_multiple')) {
-            return isset($varValue['bin'][0]) ? $varValue['bin'][0] : null;
+            return isset($varValue['value']['bin'][0]) ? $varValue['value']['bin'][0] : null;
         }
 
-        return $varValue['bin'];
+        return $varValue['value']['bin'];
     }
 
     /**
