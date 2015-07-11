@@ -38,7 +38,7 @@
     "metamodels/core": "~2.0"
   },
   "require-dev": {
-    "cyberspectrum/contao-toolbox": "dev-master",
+    "cyberspectrum/contao-toolbox": "~0.6",
     "phpcq/all-tasks": "~1.0",
     "metamodels/base-unit-tests": "~1.0"
   },
@@ -63,7 +63,8 @@
       }
     },
     "branch-alias": {
-      "dev-tng": "2.0.x-dev"
+      "dev-master": "2.0.x-dev",
+      "dev-develop": "2.1.x-dev"
     }
   },
   "minimum-stability": "dev",
