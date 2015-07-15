@@ -1,1 +1,1 @@
-<?php if (isset($this->raw['path'])) { echo implode(',', (array) $this->raw['path']); } ?>
+<?php if (isset($this->raw['value']['path'])) { echo implode(', ', (array) $this->raw['value']['path']); } ?>
