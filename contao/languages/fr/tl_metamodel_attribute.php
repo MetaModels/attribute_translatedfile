@@ -8,10 +8,11 @@
  *
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  *
- * last-updated: 2014-05-08T08:14:41+02:00
+ * last-updated: 2015-07-11T07:34:25+02:00
  */
 
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['0']      = 'Personnalier l\'arborescence de fichiers';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['1']      = 'Vous permet de choisir les réglages personnalisés concernant l\'arborescence des fichiers';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filePicker']['0']          = 'Selecteur de fichiers';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['0']           = 'Autoriser seulement les fichiers';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['1']           = 'Sélectionner cette option pour restreindre l\'explorateur au fichier seulement (répertoires non sélectionnables)';
@@ -22,3 +23,4 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Type de fichiers valides';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Veuillez entrer une liste séparée par des virgules des types de fichiers valide pour ce champ.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'Fichier traduit';
+
