@@ -53,6 +53,8 @@ class TranslatedFile extends TranslatedReference
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException If no binary in value throw invalid exception.
      */
     protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
     {
@@ -84,18 +86,12 @@ class TranslatedFile extends TranslatedReference
         }
 
         if ($arrRowData[$this->getColName()]) {
-            if (isset($arrRowData[$this->getColName()]['value']['bin'])) {
-                foreach ($arrRowData[$this->getColName()]['value']['bin'] as $strFile) {
-                    $objToolbox->addPathById($strFile);
-                }
-            } elseif (is_array($arrRowData[$this->getColName()])) {
-                // FIXME: should not happen anymore.
-                foreach ($arrRowData[$this->getColName()] as $strFile) {
-                    $objToolbox->addPathById($strFile);
-                }
-            } else {
-                // FIXME: should not happen anymore.
-                $objToolbox->addPathById($arrRowData[$this->getColName()]);
+            if (!isset($arrRowData[$this->getColName()]['value']['bin'])) {
+                throw new \InvalidArgumentException('No binary in value.');
+            }
+
+            foreach ($arrRowData[$this->getColName()]['value']['bin'] as $strFile) {
+                $objToolbox->addPathById($strFile);
             }
         }
 
