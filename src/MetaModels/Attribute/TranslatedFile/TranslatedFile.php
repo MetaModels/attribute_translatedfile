@@ -37,9 +37,9 @@ use MetaModels\Render\Template;
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
  *
- * @package     MetaModels
- * @subpackage  AttributeText
- * @author      Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @package    MetaModels
+ * @subpackage AttributeText
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
 class TranslatedFile extends TranslatedReference
 {
