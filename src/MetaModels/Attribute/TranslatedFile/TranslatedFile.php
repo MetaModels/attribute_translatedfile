@@ -75,8 +75,8 @@ class TranslatedFile extends TranslatedReference
             )
         );
 
-        if (strlen($this->get('file_validFileTypes'))) {
-            $objToolbox->setAcceptedExtensions($this->get('file_validFileTypes'));
+        if (strlen($types = trim($this->get('file_validFileTypes')))) {
+            $objToolbox->setAcceptedExtensions($types);
         }
 
         $objToolbox->setShowImages($objSettings->get('file_showImage'));
