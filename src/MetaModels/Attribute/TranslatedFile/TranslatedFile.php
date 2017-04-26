@@ -3,15 +3,12 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2017 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
  * @subpackage AttributeTranslatedFile
@@ -23,7 +20,8 @@
  * @author     David Greminger <david.greminger@1up.io>
  * @author     Andreas Nölke <zero@brothers-project.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -36,10 +34,6 @@ use MetaModels\Render\Template;
 
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
- *
- * @package    MetaModels
- * @subpackage AttributeText
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
 class TranslatedFile extends TranslatedReference
 {
@@ -49,6 +43,46 @@ class TranslatedFile extends TranslatedReference
     protected function getValueTable()
     {
         return 'tl_metamodel_translatedlongblob';
+    }
+
+    /**
+     * Build a where clause for the given id(s) and language code.
+     *
+     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     *
+     * @param string|string[]      $mixLangCode The language code/s to use, optional.
+     *
+     * @return array
+     */
+    protected function getWhere($mixIds, $mixLangCode = '')
+    {
+        $procedure  = 'att_id=?';
+        $parameters = array($this->get('id'));
+
+        if (!empty($mixIds)) {
+            if (is_array($mixIds)) {
+                $procedure .= ' AND item_id IN (' . $this->parameterMask($mixIds) . ')';
+                $parameters = array_merge($parameters, $mixIds);
+            } else {
+                $procedure   .= ' AND item_id=?';
+                $parameters[] = $mixIds;
+            }
+        }
+
+        if (!empty($mixLangCode)) {
+            if (is_array($mixLangCode)) {
+                $procedure .= ' AND langcode IN (' . $this->parameterMask($mixLangCode) . ')';
+                $parameters = array_merge($parameters, $mixLangCode);
+            } else {
+                $procedure   .= ' AND langcode=?';
+                $parameters[] = $mixLangCode;
+            }
+        }
+
+        return array(
+            'procedure' => $procedure,
+            'params'    => $parameters
+        );
     }
 
     /**
@@ -247,6 +281,47 @@ class TranslatedFile extends TranslatedReference
             'langcode' => $strLangCode,
             'item_id'  => $intId,
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTranslatedDataFor($arrValues, $strLangCode)
+    {
+        $objDB = $this->getMetaModel()->getServiceContainer()->getDatabase();
+        // First off determine those to be updated and those to be inserted.
+        $arrIds      = array_keys($arrValues);
+        $arrExisting = array_keys($this->getTranslatedDataFor($arrIds, $strLangCode));
+        $arrNewIds   = array_diff($arrIds, $arrExisting);
+
+        // Update existing values - delete if empty.
+        $strQueryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
+        $strQueryDelete = 'DELETE FROM ' . $this->getValueTable();
+
+        foreach ($arrExisting as $intId) {
+            $arrWhere = $this->getWhere($intId, $strLangCode);
+
+            if ($arrValues[$intId]['value']['bin'][0]) {
+                $objDB->prepare($strQueryUpdate . ($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : ''))
+                    ->set($this->getSetValues($arrValues[$intId], $intId, $strLangCode))
+                    ->execute(($arrWhere ? $arrWhere['params'] : null));
+            } else {
+                $objDB->prepare($strQueryDelete . ($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : ''))
+                    ->execute(($arrWhere ? $arrWhere['params'] : null));
+            }
+        }
+
+        // Insert the new values - if not empty.
+        $strQueryInsert = 'INSERT INTO ' . $this->getValueTable() . ' %s';
+        foreach ($arrNewIds as $intId) {
+            if (!$arrValues[$intId]['value']['bin'][0]) {
+                continue;
+            }
+
+            $objDB->prepare($strQueryInsert)
+                ->set($this->getSetValues($arrValues[$intId], $intId, $strLangCode))
+                ->execute();
+        }
     }
 
     /**
