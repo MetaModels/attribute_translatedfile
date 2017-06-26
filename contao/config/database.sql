@@ -7,9 +7,9 @@
 -- *                                                        *
 -- **********************************************************
 
--- 
+--
 -- Table `tl_metamodel_translatedtext`
--- 
+--
 
 CREATE TABLE `tl_metamodel_translatedlongblob` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -18,6 +18,7 @@ CREATE TABLE `tl_metamodel_translatedlongblob` (
   `item_id` int(10) unsigned NOT NULL default '0',
   `langcode` varchar(5) NOT NULL default '',
   `value` longblob NULL,
+  `value_sorting` longblob NULL,
   PRIMARY KEY  (`id`),
   KEY `attlang` (`att_id`, `langcode`),
   KEY `attitem` (`att_id`, `item_id`)
