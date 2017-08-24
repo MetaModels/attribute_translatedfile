@@ -8,10 +8,11 @@
  *
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  *
- * last-updated: 2013-07-10T10:05:51+02:00
+ * last-updated: 2017-08-24T07:59:27+02:00
  */
 
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['0']      = 'Personalizza la struttura ad albero dei file';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_customFiletree']['1']      = 'Questa opzione permette di impostare le opzioni personalizzate per la gestione file.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['0']           = 'Abilita solo file';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_filesOnly']['1']           = 'Seleziona questa opzione per limitare la selezione ai soli file (le cartelle non saranno selezionabili)';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_multiple']['0']            = 'Selezione multipla';
@@ -21,3 +22,4 @@ $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_uploadFolder']['1']        =
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['0']      = 'Tipologia file validi';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['file_validFileTypes']['1']      = 'Inserire i tipi di file che si vuole visualizzare. Utilizzare il simbolo pipe come separatore.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedfile'] = 'File tradotto';
+
