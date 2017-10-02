@@ -13,7 +13,7 @@ $strAlt   = ($arrFile['caption']) ? $arrFile['caption'] : ''; ?>
 	<?php endif; ?>
 
 	<?php if ($this->settings->get('file_showImage')): ?>
-		<?php if ($arrFile['isGdImage']): ?>
+		<?php if ($arrFile['isGdImage'] || $arrFile['isSvgImage']): ?>
 			<?php echo $this->generateImage($arrFile['src'], $strAlt); ?>
 		<?php endif; ?>
 	<?php else: ?>
