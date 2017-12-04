@@ -21,12 +21,13 @@
  * @author     Andreas Nölke <zero@brothers-project.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
-namespace MetaModels\Attribute\TranslatedFile;
+namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
