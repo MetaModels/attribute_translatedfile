@@ -23,8 +23,10 @@
  * @filesource
  */
 
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
 use MetaModels\Attribute\TranslatedFile\AttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
+use MetaModels\Events\Attribute\TranslatedFile\ImageSizeOptions;
 use MetaModels\MetaModelsEvents;
 
 return array
@@ -35,4 +37,8 @@ return array
             $factory->addTypeFactory(new AttributeTypeFactory());
         }
     ),
+
+    GetPropertyOptionsEvent::NAME => array(
+        array(new ImageSizeOptions(), 'getPropertyOptions')
+    )
 );
