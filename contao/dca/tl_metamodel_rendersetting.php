@@ -43,12 +43,14 @@ $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_sortBy'] = arra
         'tl_class'            => 'w50',
         'chosen'              => true,
     ),
+    'sql'                     => 'varchar(32) NOT NULL default \'\''
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_showLink'] = array(
     'label'                   => &$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['file_showLink'],
     'inputType'               => 'checkbox',
     'eval'                    => array('tl_class' => 'w50 m12'),
+    'sql'                     => 'char(1) NOT NULL default \'\''
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_showImage'] = array(
@@ -58,6 +60,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_showImage'] = a
         'submitOnChange'      => true,
         'tl_class'            => 'clr',
     ),
+    'sql'                     => 'char(1) NOT NULL default \'\''
 );
 
 $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_imageSize'] = array(
@@ -73,4 +76,5 @@ $GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['file_imageSize'] = a
         'helpwizard'          => true,
         'tl_class'            => 'w50',
     ),
+    'sql'                     => 'varchar(255) NOT NULL default \'\''
 );
