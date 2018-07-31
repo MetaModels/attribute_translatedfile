@@ -18,7 +18,6 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Stefan heimes <stefan_heimes@hotmail.com>
  * @author     Andreas Isaak <andy.jared@googlemail.com>
- * @author     Carolina M. Koehn <office@kikmedia.de>
  * @author     David Greminger <david.greminger@1up.io>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>

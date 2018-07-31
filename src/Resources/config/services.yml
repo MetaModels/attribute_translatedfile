@@ -5,3 +5,11 @@ services:
       - "@database_connection"
     tags:
       - { name: metamodels.attribute_factory }
+
+    metamodels.attribute_translatedfile.event_listener.image_size_options:
+      class: MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions
+      public: true
+      tags:
+      -   name: kernel.event_listener
+          event: dc-general.view.contao2backend.get-property-options
+          method: getPropertyOptions

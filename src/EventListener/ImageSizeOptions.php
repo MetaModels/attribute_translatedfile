@@ -14,12 +14,13 @@
  * @subpackage AttributeFile
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-namespace MetaModels\Events\Attribute\TranslatedFile;
+namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\DefaultDataProvider;
