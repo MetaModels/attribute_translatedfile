@@ -29,6 +29,7 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
+use Contao\StringUtil;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\Render\Template;
@@ -334,7 +335,7 @@ class TranslatedFile extends TranslatedReference
 
         foreach ($arrValues as $intId => $arrValue) {
             $arrValues[$intId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                deserialize($arrValue['value'], true)
+                StringUtil::deserialize($arrValue['value'], true)
             );
         }
 
