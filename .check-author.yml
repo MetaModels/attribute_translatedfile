@@ -1,3 +1,5 @@
-# Paths to exclude from scanning (equivalent to cmd line parameter --exclude=...)
+ignore:
+  - 'Mini Model <minimodel@metamodel.me>'
+
 exclude:
-  - contao/languages
+  - /^src\/Resources\/contao\/languages/
