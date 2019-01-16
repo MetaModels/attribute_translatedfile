@@ -14,6 +14,7 @@
  * @subpackage AttributeTranslatedFile
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_file/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -27,6 +28,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
 
 /**
  * This test case test the extension.
@@ -56,7 +58,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
 
         $container
-            ->expects($this->exactly(1))
+            ->expects($this->exactly(2))
             ->method('setDefinition')
             ->withConsecutive(
                 [
@@ -67,6 +69,18 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                             $this->assertInstanceOf(Definition::class, $value);
                             $this->assertEquals(AttributeTypeFactory::class, $value->getClass());
                             $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    ImageSizeOptions::class,
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
 
                             return true;
                         }
