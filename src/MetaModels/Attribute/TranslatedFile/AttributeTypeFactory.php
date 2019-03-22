@@ -37,4 +37,27 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
         $this->typeIcon  = 'system/modules/metamodelsattribute_translatedfile/html/file.png';
         $this->typeClass = 'MetaModels\Attribute\TranslatedFile\TranslatedFile';
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createInstance($information, $metaModel)
+    {
+        $sortAttribute = $information['colname'] . '__sort';
+
+        $file = parent::createInstance($information, $metaModel);
+
+        if (!$information['file_multiple']
+            || $metaModel->hasAttribute($sortAttribute)
+        ) {
+            return $file;
+        }
+
+        $information['id']      = $information['id'] . '__sort';
+        $information['colname'] = $sortAttribute;
+        $order                  = new TranslatedFileOrder($metaModel, $information);
+        $metaModel->addAttribute($order);
+
+        return $file;
+    }
 }

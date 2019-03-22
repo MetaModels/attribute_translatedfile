@@ -128,8 +128,17 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
+        $arrData = array();
         $objToolbox->resolveFiles();
-        $arrData = $objToolbox->sortFiles($objSettings->get('file_sortBy'));
+        if ('manual' !== $objSettings->get('file_sortBy')) {
+            $arrData = $objToolbox->sortFiles($objSettings->get('file_sortBy'));
+        }
+        if ('manual' === $objSettings->get('file_sortBy')) {
+            $arrData = $objToolbox->sortFiles(
+                $objSettings->get('file_sortBy'),
+                (array) unserialize($arrRowData[$this->getColName()]['value_sorting'])
+            );
+        }
 
         $objTemplate->files = $arrData['files'];
         $objTemplate->src   = $arrData['source'];
@@ -140,13 +149,17 @@ class TranslatedFile extends TranslatedReference
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(parent::getAttributeSettingNames(), array(
-            'file_multiple',
-            'file_customFiletree',
-            'file_uploadFolder',
-            'file_validFileTypes',
-            'file_filesOnly',
-        ));
+        return array_merge(
+            parent::getAttributeSettingNames(),
+            array(
+                'file_multiple',
+                'file_customFiletree',
+                'file_uploadFolder',
+                'file_validFileTypes',
+                'file_filesOnly',
+                'file_widgetMode',
+            )
+        );
     }
 
     /**
@@ -198,6 +211,17 @@ class TranslatedFile extends TranslatedReference
         $arrFieldDef['eval']['extensions'] = \Config::get('allowedDownload');
         $arrFieldDef['eval']['multiple']   = (bool) $this->get('file_multiple');
 
+        $widgetMode = $this->getOverrideValue('file_widgetMode', $arrOverrides);
+
+        if (('normal' !== $widgetMode)
+            && ((bool) $this->get('file_multiple'))
+        ) {
+            $arrFieldDef['eval']['orderField'] = $this->getColName() . '__sort';
+        }
+
+        $arrFieldDef['eval']['isDownloads'] = ('downloads' === $widgetMode);
+        $arrFieldDef['eval']['isGallery']   = ('gallery' === $widgetMode);
+
         if ($this->get('file_multiple')) {
             $arrFieldDef['eval']['fieldType'] = 'checkbox';
         } else {
@@ -234,7 +258,7 @@ class TranslatedFile extends TranslatedReference
     {
         return array(
             'tstamp' => time(),
-            'value' => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
+            'value'  => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
             'att_id' => $this->get('id'),
         );
     }
