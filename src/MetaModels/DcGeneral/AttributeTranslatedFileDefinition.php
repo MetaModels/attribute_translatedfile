@@ -32,7 +32,7 @@ class AttributeTranslatedFileDefinition implements DefinitionInterface
      *
      * @var string[]
      */
-    private $fileProperties = array();
+    private $fileProperties = [];
 
     /**
      * Add a file property.
@@ -43,7 +43,7 @@ class AttributeTranslatedFileDefinition implements DefinitionInterface
      */
     public function add($filePropertyName)
     {
-        if (in_array($filePropertyName, $this->fileProperties)) {
+        if (\in_array($filePropertyName, $this->fileProperties)) {
             return;
         }
         $this->fileProperties[] = $filePropertyName;

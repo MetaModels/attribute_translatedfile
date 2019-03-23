@@ -56,12 +56,12 @@ class TranslatedFile extends TranslatedReference
     protected function getWhere($mixIds, $mixLangCode = '')
     {
         $procedure  = 'att_id=?';
-        $parameters = array($this->get('id'));
+        $parameters = [$this->get('id')];
 
         if (!empty($mixIds)) {
-            if (is_array($mixIds)) {
+            if (\is_array($mixIds)) {
                 $procedure .= ' AND item_id IN (' . $this->parameterMask($mixIds) . ')';
-                $parameters = array_merge($parameters, $mixIds);
+                $parameters = \array_merge($parameters, $mixIds);
             } else {
                 $procedure   .= ' AND item_id=?';
                 $parameters[] = $mixIds;
@@ -69,19 +69,19 @@ class TranslatedFile extends TranslatedReference
         }
 
         if (!empty($mixLangCode)) {
-            if (is_array($mixLangCode)) {
+            if (\is_array($mixLangCode)) {
                 $procedure .= ' AND langcode IN (' . $this->parameterMask($mixLangCode) . ')';
-                $parameters = array_merge($parameters, $mixLangCode);
+                $parameters = \array_merge($parameters, $mixLangCode);
             } else {
                 $procedure   .= ' AND langcode=?';
                 $parameters[] = $mixLangCode;
             }
         }
 
-        return array(
+        return [
             'procedure' => $procedure,
             'params'    => $parameters
-        );
+        ];
     }
 
     /**
@@ -100,7 +100,7 @@ class TranslatedFile extends TranslatedReference
         $objToolbox->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage());
 
         $objToolbox->setLightboxId(
-            sprintf(
+            \sprintf(
                 '%s.%s.%s',
                 $this->getMetaModel()->getTableName(),
                 $objSettings->get('id'),
@@ -108,7 +108,7 @@ class TranslatedFile extends TranslatedReference
             )
         );
 
-        if (strlen($types = trim($this->get('file_validFileTypes')))) {
+        if (\strlen($types = \trim($this->get('file_validFileTypes')))) {
             $objToolbox->setAcceptedExtensions($types);
         }
 
@@ -128,7 +128,7 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        $arrData = array();
+        $arrData = [];
         $objToolbox->resolveFiles();
         if ('manual' !== $objSettings->get('file_sortBy')) {
             $arrData = $objToolbox->sortFiles($objSettings->get('file_sortBy'));
@@ -136,7 +136,7 @@ class TranslatedFile extends TranslatedReference
         if ('manual' === $objSettings->get('file_sortBy')) {
             $arrData = $objToolbox->sortFiles(
                 $objSettings->get('file_sortBy'),
-                (array) unserialize($arrRowData[$this->getColName()]['value_sorting'])
+                (array) \unserialize($arrRowData[$this->getColName()]['value_sorting'])
             );
         }
 
@@ -151,14 +151,14 @@ class TranslatedFile extends TranslatedReference
     {
         return array_merge(
             parent::getAttributeSettingNames(),
-            array(
+            [
                 'file_multiple',
                 'file_customFiletree',
                 'file_uploadFolder',
                 'file_validFileTypes',
                 'file_filesOnly',
-                'file_widgetMode',
-            )
+                'file_widgetMode'
+            ]
         );
     }
 
@@ -171,7 +171,7 @@ class TranslatedFile extends TranslatedReference
      */
     private function handleCustomFileTree(&$arrFieldDef)
     {
-        if (strlen($this->get('file_uploadFolder'))) {
+        if (\strlen($this->get('file_uploadFolder'))) {
             // Set root path of file chooser depending on contao version.
             $objFile = null;
 
@@ -182,7 +182,7 @@ class TranslatedFile extends TranslatedReference
             }
 
             // Check if we have a file.
-            if ($objFile != null) {
+            if (null !== $objFile) {
                 $arrFieldDef['eval']['path'] = $objFile->path;
             } else {
                 // Fallback.
@@ -190,11 +190,11 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if (strlen($this->get('file_validFileTypes'))) {
+        if (\strlen($this->get('file_validFileTypes'))) {
             $arrFieldDef['eval']['extensions'] = $this->get('file_validFileTypes');
         }
 
-        if (strlen($this->get('file_filesOnly'))) {
+        if (\strlen($this->get('file_filesOnly'))) {
             $arrFieldDef['eval']['filesOnly'] = true;
         }
     }
@@ -256,11 +256,11 @@ class TranslatedFile extends TranslatedReference
      */
     public function widgetToValue($varValue, $itemId)
     {
-        return array(
-            'tstamp' => time(),
+        return [
+            'tstamp' => \time(),
             'value'  => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
-            'att_id' => $this->get('id'),
-        );
+            'att_id' => $this->get('id')
+        ];
     }
 
     /**
@@ -276,7 +276,7 @@ class TranslatedFile extends TranslatedReference
 
         // Check single file or multiple file.
         if ($this->get('file_multiple')) {
-            return serialize($data);
+            return \serialize($data);
         }
 
         return isset($data[0]) ? $data[0] : null;
@@ -288,22 +288,22 @@ class TranslatedFile extends TranslatedReference
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
         if (empty($arrValue)) {
-            return array(
-                'tstamp'   => time(),
+            return [
+                'tstamp'   => \time(),
                 'value'    => null,
                 'att_id'   => $this->get('id'),
                 'langcode' => $strLangCode,
                 'item_id'  => $intId,
-            );
+            ];
         }
 
-        return array(
-            'tstamp'   => time(),
+        return [
+            'tstamp'   => \time(),
             'value'    => $this->convert($arrValue['value']),
             'att_id'   => $this->get('id'),
             'langcode' => $strLangCode,
             'item_id'  => $intId,
-        );
+        ];
     }
 
     /**
@@ -313,9 +313,9 @@ class TranslatedFile extends TranslatedReference
     {
         $objDB = $this->getMetaModel()->getServiceContainer()->getDatabase();
         // First off determine those to be updated and those to be inserted.
-        $arrIds      = array_keys($arrValues);
-        $arrExisting = array_keys($this->getTranslatedDataFor($arrIds, $strLangCode));
-        $arrNewIds   = array_diff($arrIds, $arrExisting);
+        $arrIds      = \array_keys($arrValues);
+        $arrExisting = \array_keys($this->getTranslatedDataFor($arrIds, $strLangCode));
+        $arrNewIds   = \array_diff($arrIds, $arrExisting);
 
         // Update existing values - delete if empty.
         $strQueryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
@@ -356,7 +356,7 @@ class TranslatedFile extends TranslatedReference
 
         foreach ($arrValues as $intId => $arrValue) {
             $arrValues[$intId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                deserialize($arrValue['value'], true)
+                \deserialize($arrValue['value'], true)
             );
         }
 

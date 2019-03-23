@@ -21,6 +21,6 @@
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['metapalettes']['translatedfile extends default'] = array(
-    '+advanced' => array('file_sortBy', 'file_showLink', 'file_showImage'),
-);
+$GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['metapalettes']['translatedfile extends default'] = [
+    '+advanced' => ['file_sortBy', 'file_showLink', 'file_showImage']
+];

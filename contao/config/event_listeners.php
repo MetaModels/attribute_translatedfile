@@ -27,20 +27,19 @@ use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Events\Attribute\TranslatedFile\ImageSizeOptions;
 use MetaModels\MetaModelsEvents;
 
-return array
-(
-    MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE => array(
+return [
+    MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE => [
         function (CreateAttributeFactoryEvent $event) {
             $factory = $event->getFactory();
             $factory->addTypeFactory(new AttributeTypeFactory());
         }
-    ),
-    MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND   => array(
+    ],
+    MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND   => [
         function (MetaModelsBootEvent $event) {
             new Subscriber($event->getServiceContainer());
         }
-    ),
-    GetPropertyOptionsEvent::NAME => array(
-        array(new ImageSizeOptions(), 'getPropertyOptions')
-    )
-);
+    ],
+    GetPropertyOptionsEvent::NAME => [
+        [new ImageSizeOptions(), 'getPropertyOptions']
+    ]
+];

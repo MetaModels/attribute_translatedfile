@@ -111,7 +111,7 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function getAttributeFactories()
     {
-        return array(new AttributeTypeFactory());
+        return [new AttributeTypeFactory()];
     }
 
     /**
@@ -123,7 +123,7 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
     {
         $factory   = new AttributeTypeFactory();
         $attribute = $factory->createInstance(
-            array('colname' => 'foo', 'file_multiple' => null),
+            ['colname' => 'foo', 'file_multiple' => null],
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
@@ -140,7 +140,7 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
     {
         $factory   = new AttributeTypeFactory();
         $attribute = $factory->createInstance(
-            array('id' => 'foo', 'colname' => 'foo', 'file_multiple' => '1'),
+            ['id' => 'foo', 'colname' => 'foo', 'file_multiple' => '1'],
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 

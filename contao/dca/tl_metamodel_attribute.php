@@ -28,42 +28,35 @@
 /**
  * Add palette configuration.
  */
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedfile extends _complexattribute_'] = array(
-    '+advanced' => array('file_customFiletree', 'file_multiple'),
-    '+display'  => array('-width50'),
-);
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedfile extends _complexattribute_'] = [
+    '+advanced' => ['file_customFiletree', 'file_multiple'],
+    '+display'  => ['-width50']
+];
 
 /**
  * Add data provider.
  */
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['data_provider']['tl_metamodel_translatedlongblob'] =
-    array
-    (
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['data_provider']['tl_metamodel_translatedlongblob'] = [
         'source' => 'tl_metamodel_translatedlongblob'
-    );
+];
 
 /**
  * Add child condition.
  */
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] = array
-(
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] = [
     'from'   => 'tl_metamodel_attribute',
     'to'     => 'tl_metamodel_translatedlongblob',
-    'setOn'  => array
-    (
-        array
-        (
+    'setOn'  => [
+        [
             'to_field'   => 'att_id',
             'from_field' => 'id',
-        ),
-    ),
-    'filter' => array
-    (
-        array
-        (
+        ]
+    ],
+    'filter' => [
+        [
             'local'     => 'att_id',
             'remote'    => 'id',
-            'operation' => '=',
-        ),
-    )
-);
+            'operation' => '='
+        ],
+    ]
+];

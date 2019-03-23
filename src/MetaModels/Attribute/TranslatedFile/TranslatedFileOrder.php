@@ -47,14 +47,14 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         return array_merge(
             parent::getAttributeSettingNames(),
-            array(
+            [
                 'file_multiple',
                 'file_customFiletree',
                 'file_uploadFolder',
                 'file_validFileTypes',
                 'file_filesOnly',
-                'file_widgetMode',
-            )
+                'file_widgetMode'
+            ]
         );
     }
 
@@ -79,11 +79,11 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function widgetToValue($varValue, $itemId)
     {
-        return array(
-            'tstamp'        => time(),
+        return [
+            'tstamp'        => \time(),
             'value_sorting' => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
-            'att_id'        => substr($this->get('id'), 0, -strlen('__sort')),
-        );
+            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort'))
+        ];
     }
 
     /**
@@ -99,7 +99,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         // Check single file or multiple file.
         if ($this->get('file_multiple')) {
-            return serialize($data);
+            return \serialize($data);
         }
 
         return isset($data[0]) ? $data[0] : null;
@@ -111,22 +111,22 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
         if (empty($arrValue)) {
-            return array(
-                'tstamp'        => time(),
+            return [
+                'tstamp'        => \time(),
                 'value_sorting' => null,
-                'att_id'        => substr($this->get('id'), 0, -strlen('__sort')),
+                'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort')),
                 'langcode'      => $strLangCode,
                 'item_id'       => $intId,
-            );
+            ];
         }
 
-        return array(
-            'tstamp'        => time(),
+        return [
+            'tstamp'        => \time(),
             'value_sorting' => $this->convert($arrValue['value_sorting']),
-            'att_id'        => substr($this->get('id'), 0, -strlen('__sort')),
+            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort')),
             'langcode'      => $strLangCode,
             'item_id'       => $intId,
-        );
+        ];
     }
 
     /**
@@ -138,7 +138,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         foreach ($arrValues as $intId => $arrValue) {
             $arrValues[$intId]['value_sorting'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                deserialize($arrValue['value_sorting'], true)
+                \deserialize($arrValue['value_sorting'], true)
             );
         }
 

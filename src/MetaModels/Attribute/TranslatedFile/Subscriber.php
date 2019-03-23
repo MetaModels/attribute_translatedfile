@@ -41,11 +41,11 @@ class Subscriber extends BaseSubscriber
         $this
             ->addListener(
                 BuildAttributeEvent::NAME,
-                array($this, 'buildAttribute')
+                [$this, 'buildAttribute']
             )
             ->addListener(
                 BuildDataDefinitionEvent::NAME,
-                array($this, 'buildDataDefinition'),
+                [$this, 'buildDataDefinition'],
                 // Ensure to be after MetaModels\DcGeneral\Dca\Builder\Builder::PRIORITY (currently 50).
                 0
             );
