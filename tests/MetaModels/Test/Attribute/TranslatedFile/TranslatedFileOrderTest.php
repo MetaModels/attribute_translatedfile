@@ -22,14 +22,15 @@
 namespace MetaModels\Test\Attribute\TranslatedFile;
 
 use MetaModels\Attribute\TranslatedFile\TranslatedFile;
+use MetaModels\Attribute\TranslatedFile\TranslatedFileOrder;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests to test class GeoProtection.
  *
- * @covers \MetaModels\Attribute\TranslatedFile\TranslatedFile
+ * @covers \MetaModels\Attribute\TranslatedFile\TranslatedFileOrder
  */
-class TranslatedFileTest extends TestCase
+class TranslatedFileOrderTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -68,7 +69,7 @@ class TranslatedFileTest extends TestCase
      */
     public function testInstantiation()
     {
-        $text = new TranslatedFile($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFile', $text);
+        $text = new TranslatedFileOrder($this->mockMetaModel('en', 'en'));
+        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFileOrder', $text);
     }
 }
