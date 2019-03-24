@@ -53,11 +53,12 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
             return $file;
         }
 
+        // Inject ad-hoc the main attribute before inject the order attribute.
+        $metaModel->addAttribute($file);
+
         $information['id']      = $information['id'] . '__sort';
         $information['colname'] = $sortAttribute;
-        $order                  = new TranslatedFileOrder($metaModel, $information);
-        $metaModel->addAttribute($order);
 
-        return $file;
+        return new TranslatedFileOrder($metaModel, $information);
     }
 }
