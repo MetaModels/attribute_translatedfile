@@ -50,6 +50,9 @@ $GLOBALS['TL_DCA']['tl_metamodel_translatedlongblob'] = [
         ],
         'value' => [
             'sql'                     => 'longblob NULL'
+        ],
+        'value_sorting' => [
+            'sql'                     => 'longblob NULL'
         ]
     ]
 ];

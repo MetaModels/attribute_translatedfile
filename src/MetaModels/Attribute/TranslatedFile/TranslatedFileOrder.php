@@ -111,22 +111,37 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
         if (empty($arrValue)) {
-            return [
-                'tstamp'        => \time(),
-                'value_sorting' => null,
-                'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort')),
-                'langcode'      => $strLangCode,
-                'item_id'       => $intId,
-            ];
+            return [];
         }
 
         return [
             'tstamp'        => \time(),
-            'value_sorting' => $this->convert($arrValue['value_sorting']),
-            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort')),
-            'langcode'      => $strLangCode,
-            'item_id'       => $intId,
+            'value_sorting' => $this->convert($arrValue['value_sorting'])
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTranslatedDataFor($values, $langCode)
+    {
+        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
+        // First off determine those to be updated and those to be inserted.
+        $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($values), $langCode));
+
+        $queryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
+        foreach ($existingIds as $existingId) {
+            if (!isset($values[$existingId]['value_sorting']['bin'][0])
+                || !\count(($setValues = $this->getSetValues($values[$existingId], $existingId, $langCode)))
+            ) {
+                continue;
+            }
+
+            $whereParts = $this->getWhere($existingId, $langCode);
+            $database->prepare($queryUpdate . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
+                ->set($setValues)
+                ->execute(($whereParts ? $whereParts['params'] : null));
+        }
     }
 
     /**
@@ -143,5 +158,44 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         }
 
         return $arrValues;
+    }
+
+    /**
+     * Build a where clause for the given id(s) and language code.
+     *
+     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     * @param string|string[]      $mixLangCode The language code/s to use, optional.
+     *
+     * @return array
+     */
+    private function getWhere($mixIds, $mixLangCode = '')
+    {
+        $procedure  = 'att_id=?';
+        $parameters = [$this->get('id')];
+
+        if (!empty($mixIds)) {
+            if (\is_array($mixIds)) {
+                $procedure .= ' AND item_id IN (' . $this->parameterMask($mixIds) . ')';
+                $parameters = \array_merge($parameters, $mixIds);
+            } else {
+                $procedure   .= ' AND item_id=?';
+                $parameters[] = $mixIds;
+            }
+        }
+
+        if (!empty($mixLangCode)) {
+            if (\is_array($mixLangCode)) {
+                $procedure .= ' AND langcode IN (' . $this->parameterMask($mixLangCode) . ')';
+                $parameters = \array_merge($parameters, $mixLangCode);
+            } else {
+                $procedure   .= ' AND langcode=?';
+                $parameters[] = $mixLangCode;
+            }
+        }
+
+        return [
+            'procedure' => $procedure,
+            'params'    => $parameters
+        ];
     }
 }
