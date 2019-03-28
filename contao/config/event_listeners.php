@@ -20,9 +20,12 @@
  */
 
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
+use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
+use MetaModels\Attribute\TranslatedFile\AttributeOrderTypeFactory;
 use MetaModels\Attribute\TranslatedFile\AttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
 use MetaModels\Attribute\TranslatedFile\Subscriber;
+use MetaModels\Events\Attribute\TranslatedFile\AddAttributeInformation;
 use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Events\Attribute\TranslatedFile\ImageSizeOptions;
 use MetaModels\MetaModelsEvents;
@@ -32,7 +35,11 @@ return [
         function (CreateAttributeFactoryEvent $event) {
             $factory = $event->getFactory();
             $factory->addTypeFactory(new AttributeTypeFactory());
+            $factory->addTypeFactory(new AttributeOrderTypeFactory());
         }
+    ],
+    CollectMetaModelAttributeInformationEvent::NAME => [
+        [[new AddAttributeInformation(), 'addInformation'], -1]
     ],
     MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND   => [
         function (MetaModelsBootEvent $event) {

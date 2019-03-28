@@ -136,7 +136,9 @@ class TranslatedFile extends TranslatedReference
         if ('manual' === $objSettings->get('file_sortBy')) {
             $arrData = $objToolbox->sortFiles(
                 $objSettings->get('file_sortBy'),
-                (array) \unserialize($arrRowData[$this->getColName()]['value_sorting'])
+                isset($arrRowData[$this->getColName()]['value_sorting']['bin'])
+                    ? $arrRowData[$this->getColName()]['value_sorting']['bin']
+                    : []
             );
         }
 
@@ -352,12 +354,22 @@ class TranslatedFile extends TranslatedReference
      */
     public function getTranslatedDataFor($arrIds, $strLangCode)
     {
+        $metaModel = $this->getMetaModel();
         $arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
 
         foreach ($arrValues as $intId => $arrValue) {
             $arrValues[$intId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
                 \deserialize($arrValue['value'], true)
             );
+        }
+
+        if ($metaModel->hasAttribute($this->getColName() . '__sort')) {
+            $orderAttribute = $metaModel->getAttribute($this->getColName() . '__sort');
+
+            $sortedValues = $orderAttribute->getTranslatedDataFor($arrIds, $strLangCode);
+            foreach ($arrValues as $intId => $arrValue) {
+                $arrValues[$intId]['value_sorting'] = $sortedValues[$intId]['value_sorting'];
+            }
         }
 
         return $arrValues;

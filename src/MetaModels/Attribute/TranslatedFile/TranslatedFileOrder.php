@@ -87,6 +87,23 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function get($key)
+    {
+        $metaModel = $this->getMetaModel();
+
+        $mainColumnName = \str_replace('__sort', '', $this->getColName());
+        if (\in_array($key, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
+            $mainAttribute = $metaModel->getAttribute($mainColumnName);
+
+            return $mainAttribute->get($key);
+        }
+
+        return null;
+    }
+
+    /**
      * Take the native data and serialize it for the database.
      *
      * @param mixed $mixValues The data to serialize.
