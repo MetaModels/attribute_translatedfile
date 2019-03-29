@@ -26,6 +26,8 @@ use MetaModels\Attribute\TranslatedFile\AttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
 use MetaModels\Attribute\TranslatedFile\Subscriber;
 use MetaModels\Events\Attribute\TranslatedFile\AddAttributeInformation;
+use MetaModels\Events\DcGeneral\Table\Attribute\TranslatedFile\RemoveTypeOptions;
+use MetaModels\Events\DcGeneral\Table\FilterSetting\TranslatedFile\RemoveAttIdOptions;
 use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Events\Attribute\TranslatedFile\ImageSizeOptions;
 use MetaModels\MetaModelsEvents;
@@ -47,6 +49,8 @@ return [
         }
     ],
     GetPropertyOptionsEvent::NAME => [
-        [new ImageSizeOptions(), 'getPropertyOptions']
+        [new ImageSizeOptions(), 'getPropertyOptions'],
+        [[new RemoveTypeOptions(), 'removeOption'], -1],
+        [[new RemoveAttIdOptions(), 'removeOption'], -1]
     ]
 ];
