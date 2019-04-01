@@ -20,30 +20,17 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
+use ContaoCommunityAlliance\DcGeneral\DataDefinition\ContainerInterface;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\Properties\DefaultProperty;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\AttributeTranslatedFileBundle\DcGeneral\AttributeTranslatedFileDefinition;
-use MetaModels\DcGeneral\DataDefinition\IMetaModelDataDefinition;
-use MetaModels\DcGeneral\Events\BaseSubscriber;
 use MetaModels\DcGeneral\Events\MetaModel\BuildAttributeEvent;
 
 /**
- * Subscriber integrates translated file attribute related listeners.
+ * The build attribute listener.
  */
-class Subscriber extends BaseSubscriber
+class BuildAttributeListener
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function registerEventsInDispatcher()
-    {
-        $this
-            ->addListener(
-                BuildAttributeEvent::NAME,
-                [$this, 'buildAttribute']
-            );
-    }
-
     /**
      * This builds the dc-general property information for the virtual translated file order attribute.
      *
@@ -82,13 +69,12 @@ class Subscriber extends BaseSubscriber
     /**
      * Add attribute to metamodels translated file attributes definition.
      *
-     * @param IMetaModelDataDefinition $container The metamodel data definition.
-     *
-     * @param string                   $name      The attribute name.
+     * @param ContainerInterface $container The metamodel data definition.
+     * @param string             $name      The attribute name.
      *
      * @return void
      */
-    protected function addAttributeToDefinition(IMetaModelDataDefinition $container, $name)
+    protected function addAttributeToDefinition(ContainerInterface $container, $name)
     {
         if (!$container->hasDefinition('metamodels.translatedfile-attributes')) {
             $container->setDefinition('metamodels.translatedfile-attributes', new AttributeTranslatedFileDefinition());
