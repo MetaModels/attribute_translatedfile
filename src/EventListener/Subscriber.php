@@ -18,11 +18,12 @@
  * @filesource
  */
 
-namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
+namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\Properties\DefaultProperty;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Palette\Property;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\BuildDataDefinitionEvent;
+use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\AttributeTranslatedFileBundle\DcGeneral\AttributeTranslatedFileDefinition;
 use MetaModels\DcGeneral\DataDefinition\IMetaModelDataDefinition;
 use MetaModels\DcGeneral\Events\BaseSubscriber;
