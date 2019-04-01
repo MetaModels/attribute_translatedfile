@@ -21,8 +21,6 @@
 namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\Properties\DefaultProperty;
-use ContaoCommunityAlliance\DcGeneral\DataDefinition\Palette\Property;
-use ContaoCommunityAlliance\DcGeneral\Factory\Event\BuildDataDefinitionEvent;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\AttributeTranslatedFileBundle\DcGeneral\AttributeTranslatedFileDefinition;
 use MetaModels\DcGeneral\DataDefinition\IMetaModelDataDefinition;
@@ -43,12 +41,6 @@ class Subscriber extends BaseSubscriber
             ->addListener(
                 BuildAttributeEvent::NAME,
                 [$this, 'buildAttribute']
-            )
-            ->addListener(
-                BuildDataDefinitionEvent::NAME,
-                [$this, 'buildDataDefinition'],
-                // Ensure to be after MetaModels\DcGeneral\Dca\Builder\Builder::PRIORITY (currently 50).
-                0
             );
     }
 
@@ -85,43 +77,6 @@ class Subscriber extends BaseSubscriber
         $property->setWidgetType('fileTreeOrder');
 
         $this->addAttributeToDefinition($container, $name);
-    }
-
-    /**
-     * This handles all translated file attributes and
-     * clones the visible conditions to reflect those of the translated file attribute.
-     *
-     * @param BuildDataDefinitionEvent $event The event being processed.
-     *
-     * @return void
-     */
-    public function buildDataDefinition(BuildDataDefinitionEvent $event)
-    {
-        $container = $event->getContainer();
-        if (!$container->hasDefinition('metamodels.translatedfile-attributes')) {
-            return;
-        }
-        // All properties...
-        foreach ($container->getDefinition('metamodels.translatedfile-attributes')->get() as $propertyName) {
-            // ... in all palettes ...
-            foreach ($container->getPalettesDefinition()->getPalettes() as $palette) {
-                // ... in any legend ...
-                foreach ($palette->getLegends() as $legend) {
-                    // ... of the searched name ...
-                    if (($legend->hasProperty($propertyName))
-                        && ($container->getPropertiesDefinition()->hasProperty($propertyName . '__sort'))
-                    ) {
-                        // ... must have the order field as companion, visible only when the real property is.
-                        $file = $legend->getProperty($propertyName);
-
-                        $legend->addProperty($order = new Property($propertyName . '__sort'), $file);
-
-                        $order->setEditableCondition($file->getEditableCondition());
-                        $order->setVisibleCondition($file->getVisibleCondition());
-                    }
-                }
-            }
-        }
     }
 
     /**

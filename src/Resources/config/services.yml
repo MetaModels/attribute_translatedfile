@@ -21,6 +21,14 @@ services:
                 method: addInformation
                 priority: -1
 
+    metamodels.attribute_translatedfile.event_listener.build_data_definition:
+        class: MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener
+        tags:
+            -   name: kernel.event_listener
+                event: dc-general.factory.build-data-definition
+                method: buildDataDefinition
+                priority: 0
+
     metamodels.attribute_translatedfile.event_listener.image_size_options:
         class: MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions
         tags:
