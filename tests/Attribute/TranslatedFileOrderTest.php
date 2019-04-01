@@ -14,7 +14,6 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     David Greminger <david.greminger@1up.io>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -22,17 +21,15 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\Attribute;
 
-use Doctrine\DBAL\Connection;
-use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
-use MetaModels\IMetaModel;
+use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFileOrder;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests to test class GeoProtection.
  *
- * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile
+ * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFileOrder
  */
-class TranslatedFileTest extends TestCase
+class TranslatedFileOrderTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -44,7 +41,7 @@ class TranslatedFileTest extends TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
+        $metaModel = $this->getMockForAbstractClass('MetaModels\IMetaModel');
 
         $metaModel
             ->expects($this->any())
@@ -65,25 +62,13 @@ class TranslatedFileTest extends TestCase
     }
 
     /**
-     * Mock the database connection.
-     *
-     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
-     */
-    private function mockConnection()
-    {
-        return $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-    }
-
-    /**
      * Test that the attribute can be instantiated.
      *
      * @return void
      */
     public function testInstantiation()
     {
-        $text = new TranslatedFile($this->mockMetaModel('en', 'en'), [], $this->mockConnection());
-        $this->assertInstanceOf(TranslatedFile::class, $text);
+        $text = new TranslatedFileOrder($this->mockMetaModel('en', 'en'));
+        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFileOrder', $text);
     }
 }

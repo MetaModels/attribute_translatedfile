@@ -11,9 +11,7 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels/attribute_translatedfile
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -25,9 +23,9 @@ use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttributeTypeFactory;
 
 /**
- * Attribute type factory for translated combined values attributes.
+ * Attribute type factory for file order attributes.
  */
-class AttributeTypeFactory implements IAttributeTypeFactory
+class AttributeOrderTypeFactory implements IAttributeTypeFactory
 {
     /**
      * Database connection.
@@ -51,7 +49,7 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      */
     public function getTypeName()
     {
-        return 'translatedfile';
+        return 'translatedfilesort';
     }
 
     /**
@@ -59,7 +57,7 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      */
     public function getTypeIcon()
     {
-        return 'bundles/metamodelsattributetranslatedfile/file.png';
+        return '';
     }
 
     /**
@@ -67,7 +65,7 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      */
     public function createInstance($information, $metaModel)
     {
-        return new TranslatedFile($metaModel, $information, $this->connection);
+        return new TranslatedFileOrder($metaModel, $information);
     }
 
     /**
