@@ -24,16 +24,16 @@ namespace MetaModels\AttributeTranslatedFileBundle\Test\DependencyInjection;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttributeTranslatedFileExtension;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\AddAttributeInformation;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildAttributeListener;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attribute\RemoveTypeOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\FilterSetting\RemoveAttIdOptions;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
 
 /**
  * This test case test the extension.

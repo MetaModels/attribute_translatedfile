@@ -21,15 +21,15 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\Attribute;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
 use MetaModels\Attribute\IAttribute;
-use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFileOrder;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\AddAttributeInformation;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
 use MetaModels\IMetaModel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -39,7 +39,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  *
  * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory
  * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory
- * @covers \MetaModels\AttributeTranslatedFileBundle\EventListener\AddAttributeInformation
+ * @covers \MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation
  */
 class TranslatedFileAttributeTypeFactoryTest extends TestCase
 {

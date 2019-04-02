@@ -1,26 +1,4 @@
 services:
-    metamodels.attribute_translatedfile.factory:
-        class: MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory
-        arguments:
-            - "@database_connection"
-        tags:
-            - { name: metamodels.attribute_factory }
-
-    metamodels.attribute_translatedfile_order.factory:
-        class: MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory
-        arguments:
-            - "@database_connection"
-        tags:
-            - { name: metamodels.attribute_factory }
-
-    metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information:
-        class: MetaModels\AttributeTranslatedFileBundle\EventListener\AddAttributeInformation
-        tags:
-            -   name: kernel.event_listener
-                event: metamodels.metamodel.collect-metamodel-attribute-information
-                method: addInformation
-                priority: -1
-
     metamodels.attribute_translatedfile.event_listener.build_data_definition:
         class: MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener
         tags:

@@ -17,7 +17,7 @@
  * @filesource
  */
 
-namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
+namespace MetaModels\AttributeTranslatedFileBundle\EventListener\Factory;
 
 use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
 
