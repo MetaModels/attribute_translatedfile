@@ -22,8 +22,10 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\Attribute;
 
+use Contao\CoreBundle\Framework\Adapter;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
+use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
 use PHPUnit\Framework\TestCase;
 
@@ -76,6 +78,46 @@ class TranslatedFileTest extends TestCase
             ->getMock();
     }
 
+    private function mockToolboxFile()
+    {
+        return $this
+            ->getMockBuilder(ToolboxFile::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockStringUtil()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockValidator()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockFileRepository()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockConfig()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
     /**
      * Test that the attribute can be instantiated.
      *
@@ -83,7 +125,16 @@ class TranslatedFileTest extends TestCase
      */
     public function testInstantiation()
     {
-        $text = new TranslatedFile($this->mockMetaModel('en', 'en'), [], $this->mockConnection());
+        $text = new TranslatedFile(
+            $this->mockMetaModel('en', 'en'),
+            [],
+            $this->mockConnection(),
+            $this->mockToolboxFile(),
+            $this->mockStringUtil(),
+            $this->mockValidator(),
+            $this->mockFileRepository(),
+            $this->mockConfig()
+        );
         $this->assertInstanceOf(TranslatedFile::class, $text);
     }
 }

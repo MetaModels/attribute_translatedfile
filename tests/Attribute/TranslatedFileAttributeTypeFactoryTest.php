@@ -21,6 +21,7 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\Attribute;
 
+use Contao\CoreBundle\Framework\Adapter;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
 use MetaModels\Attribute\IAttribute;
@@ -30,6 +31,7 @@ use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFileOrder;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
+use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -126,12 +128,59 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
             ->getMock();
     }
 
+    private function mockToolboxFile()
+    {
+        return $this
+            ->getMockBuilder(ToolboxFile::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockStringUtil()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockValidator()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockFileRepository()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    private function mockConfig()
+    {
+        return $this
+            ->getMockBuilder(Adapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
     private function mockAttributeFactory($connection)
     {
         $factory = $this->getMockForAbstractClass('\MetaModels\Attribute\IAttributeFactory');
 
         $factories = [
-            'translatedfile'     => new AttributeTypeFactory($connection),
+            'translatedfile'     => new AttributeTypeFactory(
+                $connection,
+                $this->mockToolboxFile(),
+                $this->mockStringUtil(),
+                $this->mockValidator(),
+                $this->mockFileRepository(),
+                $this->mockConfig()
+            ),
             'translatedfilesort' => new AttributeOrderTypeFactory($connection)
         ];
 

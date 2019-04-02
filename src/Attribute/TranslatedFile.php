@@ -29,11 +29,15 @@
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\Config;
+use Contao\CoreBundle\Framework\Adapter;
 use Contao\FilesModel;
 use Contao\StringUtil;
+use Contao\System;
 use Contao\Validator;
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
+use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
 
 /**
@@ -41,6 +45,123 @@ use MetaModels\Render\Template;
  */
 class TranslatedFile extends TranslatedReference
 {
+    /**
+     * The toolbox for file.
+     *
+     * @var ToolboxFile|null
+     */
+    private $toolboxFile;
+
+    /**
+     * The string util.
+     *
+     * @var Adapter|StringUtil|null
+     */
+    private $stringUtil;
+
+    /**
+     * The validator.
+     *
+     * @var Adapter|Validator|null
+     */
+    private $validator;
+
+    /**
+     * The repository for files.
+     *
+     * @var Adapter|FilesModel|null
+     */
+    private $fileRepository;
+
+    /**
+     * The contao configurations.
+     *
+     * @var Adapter|Config|null
+     */
+    private $config;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param ToolboxFile|null        $toolboxFile    The toolbox for file.
+     * @param Adapter|StringUtil|null $stringUtil     The string util.
+     * @param Adapter|Validator|null  $validator      The validator.
+     * @param Adapter|FilesModel|null $fileRepository The repository for files.
+     * @param Adapter|Config|null     $config         The contao configurations.
+     */
+    public function __construct(
+        IMetaModel $objMetaModel,
+        $arrData = [],
+        Connection $connection = null,
+        ToolboxFile $toolboxFile = null,
+        Adapter $stringUtil = null,
+        Adapter $validator = null,
+        Adapter $fileRepository = null,
+        Adapter $config = null
+    ) {
+        parent::__construct($objMetaModel, $arrData, $connection);
+
+        if (null === $toolboxFile) {
+            // @codingStandardsIgnoreStart
+            @\trigger_error(
+                'Toolbox file is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+            $toolboxFile = System::getContainer()->get('metamodels.attribute_file.toolbox.file');
+        }
+
+        if (null === $stringUtil) {
+            // @codingStandardsIgnoreStart
+            @\trigger_error(
+                'String util file is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+
+            $stringUtil = System::getContainer()->get('contao.framework')->getAdapter(StringUtil::class);
+        }
+
+        if (null === $validator) {
+            // @codingStandardsIgnoreStart
+            @\trigger_error(
+                'Validator is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+
+            $validator = System::getContainer()->get('contao.framework')->getAdapter(Validator::class);
+        }
+
+        if (null === $fileRepository) {
+            // @codingStandardsIgnoreStart
+            @\trigger_error(
+                'File repository is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+
+            $fileRepository = System::getContainer()->get('contao.framework')->getAdapter(FilesModel::class);
+        }
+
+        if (null === $config) {
+            // @codingStandardsIgnoreStart
+            @\trigger_error(
+                'Config is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+
+            $config = System::getContainer()->get('contao.framework')->getAdapter(Config::class);
+        }
+
+        $this->toolboxFile    = $toolboxFile;
+        $this->stringUtil     = $stringUtil;
+        $this->validator      = $validator;
+        $this->fileRepository = $fileRepository;
+        $this->config         = $config;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -98,7 +219,7 @@ class TranslatedFile extends TranslatedReference
     {
         parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
-        $toolbox = new ToolboxFile();
+        $toolbox = clone $this->toolboxFile;
         $toolbox
             ->setBaseLanguage($this->getMetaModel()->getActiveLanguage())
             ->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage())
@@ -177,10 +298,10 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $file = null;
 
-            if (Validator::isStringUuid($this->get('file_uploadFolder'))
-                || Validator::isBinaryUuid($this->get('file_uploadFolder'))
+            if ($this->validator->isStringUuid($this->get('file_uploadFolder'))
+                || $this->validator->isBinaryUuid($this->get('file_uploadFolder'))
             ) {
-                $file = FilesModel::findByUuid($this->get('file_uploadFolder'));
+                $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder'));
             }
 
             // Check if we have a file.
@@ -210,7 +331,7 @@ class TranslatedFile extends TranslatedReference
 
         $fieldDefinition['inputType']          = 'fileTree';
         $fieldDefinition['eval']['files']      = true;
-        $fieldDefinition['eval']['extensions'] = Config::get('allowedDownload');
+        $fieldDefinition['eval']['extensions'] = $this->config->get('allowedDownload');
         $fieldDefinition['eval']['multiple']   = (bool) $this->get('file_multiple');
 
         $widgetMode = $this->getOverrideValue('file_widgetMode', $arrOverrides);
@@ -345,7 +466,7 @@ class TranslatedFile extends TranslatedReference
         $values = parent::getTranslatedDataFor($arrIds, $strLangCode);
         foreach ($values as $valueId => $value) {
             $values[$valueId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                StringUtil::deserialize($value['value'], true)
+                $this->stringUtil->deserialize($value['value'], true)
             );
         }
 

@@ -3,6 +3,11 @@ services:
         class: MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory
         arguments:
             - "@database_connection"
+            - "@metamodels.attribute_file.toolbox.file"
+            - "@=service('contao.framework').getAdapter('Contao\\\\StringUtil')"
+            - "@=service('contao.framework').getAdapter('Contao\\\\Validator')"
+            - "@=service('contao.framework').getAdapter('Contao\\\\FilesModel')"
+            - "@=service('contao.framework').getAdapter('Contao\\\\Config')"
         tags:
             - { name: metamodels.attribute_factory }
 
