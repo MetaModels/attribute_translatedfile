@@ -23,6 +23,7 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
+use Contao\StringUtil;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
@@ -67,11 +68,9 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             return null;
         }
 
-        if (!$this->get('file_multiple')) {
-            return isset($varValue['value_sorting']['bin'][0]) ? $varValue['value_sorting']['bin'][0] : null;
-        }
-
-        return $varValue['value_sorting']['bin'];
+        return $this->get('file_multiple')
+            ? $varValue['value_sorting']['bin']
+                : ($varValue['value_sorting']['bin'][0] ?? null);
     }
 
     /**
@@ -93,7 +92,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         $metaModel = $this->getMetaModel();
 
-        $mainColumnName = \str_replace('__sort', '', $this->getColName());
+        $mainColumnName = \substr($this->getColName(), 0, -\strlen('__sort'));
         if (\in_array($key, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
             $mainAttribute = $metaModel->getAttribute($mainColumnName);
 
@@ -106,20 +105,20 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     /**
      * Take the native data and serialize it for the database.
      *
-     * @param mixed $mixValues The data to serialize.
+     * @param mixed $values The data to serialize.
      *
      * @return string An serialized array with binary data or a binary data.
      */
-    private function convert($mixValues)
+    private function convert($values)
     {
-        $data = ToolboxFile::convertValuesToDatabase($mixValues);
+        $data = ToolboxFile::convertValuesToDatabase($values);
 
         // Check single file or multiple file.
         if ($this->get('file_multiple')) {
             return \serialize($data);
         }
 
-        return isset($data[0]) ? $data[0] : null;
+        return ($data[0] ?? null);
     }
 
     /**
@@ -166,15 +165,14 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function getTranslatedDataFor($arrIds, $strLangCode)
     {
-        $arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
-
-        foreach ($arrValues as $intId => $arrValue) {
-            $arrValues[$intId]['value_sorting'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                \deserialize($arrValue['value_sorting'], true)
+        $values = parent::getTranslatedDataFor($arrIds, $strLangCode);
+        foreach ($values as $valueId => $value) {
+            $values[$valueId]['value_sorting'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
+                StringUtil::deserialize($value['value_sorting'], true)
             );
         }
 
-        return $arrValues;
+        return $values;
     }
 
     /**

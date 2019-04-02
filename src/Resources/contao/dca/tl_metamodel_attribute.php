@@ -53,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] =
     'setOn'  => [
         [
             'to_field'   => 'att_id',
-            'from_field' => 'id',
+            'from_field' => 'id'
         ]
     ],
     'filter' => [
@@ -61,6 +61,6 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] =
             'local'     => 'att_id',
             'remote'    => 'id',
             'operation' => '='
-        ],
+        ]
     ]
 ];

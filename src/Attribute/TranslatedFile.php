@@ -28,6 +28,7 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
+use Contao\Config;
 use Contao\FilesModel;
 use Contao\StringUtil;
 use Contao\Validator;
@@ -97,29 +98,26 @@ class TranslatedFile extends TranslatedReference
     {
         parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
-        $objToolbox = new ToolboxFile();
-
-        $objToolbox->setBaseLanguage($this->getMetaModel()->getActiveLanguage());
-
-        $objToolbox->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage());
-
-        $objToolbox->setLightboxId(
-            \sprintf(
-                '%s.%s.%s',
-                $this->getMetaModel()->getTableName(),
-                $objSettings->get('id'),
-                $arrRowData['id']
+        $toolbox = new ToolboxFile();
+        $toolbox
+            ->setBaseLanguage($this->getMetaModel()->getActiveLanguage())
+            ->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage())
+            ->setLightboxId(
+                \sprintf(
+                    '%s.%s.%s',
+                    $this->getMetaModel()->getTableName(),
+                    $objSettings->get('id'),
+                    $arrRowData['id']
+                )
             )
-        );
+            ->setShowImages($objSettings->get('file_showImage'));
 
-        if (\strlen($types = \trim($this->get('file_validFileTypes')))) {
-            $objToolbox->setAcceptedExtensions($types);
+        if (($types = \trim($this->get('file_validFileTypes')))) {
+            $toolbox->setAcceptedExtensions($types);
         }
 
-        $objToolbox->setShowImages($objSettings->get('file_showImage'));
-
         if ($objSettings->get('file_imageSize')) {
-            $objToolbox->setResizeImages($objSettings->get('file_imageSize'));
+            $toolbox->setResizeImages($objSettings->get('file_imageSize'));
         }
 
         if ($arrRowData[$this->getColName()]) {
@@ -128,21 +126,19 @@ class TranslatedFile extends TranslatedReference
             }
 
             foreach ($arrRowData[$this->getColName()]['value']['bin'] as $strFile) {
-                $objToolbox->addPathById($strFile);
+                $toolbox->addPathById($strFile);
             }
         }
 
         $arrData = [];
-        $objToolbox->resolveFiles();
+        $toolbox->resolveFiles();
         if ('manual' !== $objSettings->get('file_sortBy')) {
-            $arrData = $objToolbox->sortFiles($objSettings->get('file_sortBy'));
+            $arrData = $toolbox->sortFiles($objSettings->get('file_sortBy'));
         }
         if ('manual' === $objSettings->get('file_sortBy')) {
-            $arrData = $objToolbox->sortFiles(
+            $arrData = $toolbox->sortFiles(
                 $objSettings->get('file_sortBy'),
-                isset($arrRowData[$this->getColName()]['value_sorting']['bin'])
-                    ? $arrRowData[$this->getColName()]['value_sorting']['bin']
-                    : []
+                ($arrRowData[$this->getColName()]['value_sorting']['bin'] ?? [])
             );
         }
 
@@ -155,7 +151,7 @@ class TranslatedFile extends TranslatedReference
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(
+        return \array_merge(
             parent::getAttributeSettingNames(),
             [
                 'file_multiple',
@@ -171,37 +167,37 @@ class TranslatedFile extends TranslatedReference
     /**
      * Manipulate the field definition for custom file trees.
      *
-     * @param array $arrFieldDef The field definition to manipulate.
+     * @param array $fieldDefinition The field definition to manipulate.
      *
      * @return void
      */
-    private function handleCustomFileTree(&$arrFieldDef)
+    private function handleCustomFileTree(&$fieldDefinition)
     {
-        if (\strlen($this->get('file_uploadFolder'))) {
+        if ($this->get('file_uploadFolder')) {
             // Set root path of file chooser depending on contao version.
-            $objFile = null;
+            $file = null;
 
             if (Validator::isStringUuid($this->get('file_uploadFolder'))
                 || Validator::isBinaryUuid($this->get('file_uploadFolder'))
             ) {
-                $objFile = FilesModel::findByUuid($this->get('file_uploadFolder'));
+                $file = FilesModel::findByUuid($this->get('file_uploadFolder'));
             }
 
             // Check if we have a file.
-            if (null !== $objFile) {
-                $arrFieldDef['eval']['path'] = $objFile->path;
+            if (null !== $file) {
+                $fieldDefinition['eval']['path'] = $file->path;
             } else {
                 // Fallback.
-                $arrFieldDef['eval']['path'] = $this->get('file_uploadFolder');
+                $fieldDefinition['eval']['path'] = $this->get('file_uploadFolder');
             }
         }
 
-        if (\strlen($this->get('file_validFileTypes'))) {
-            $arrFieldDef['eval']['extensions'] = $this->get('file_validFileTypes');
+        if ($this->get('file_validFileTypes')) {
+            $fieldDefinition['eval']['extensions'] = $this->get('file_validFileTypes');
         }
 
-        if (\strlen($this->get('file_filesOnly'))) {
-            $arrFieldDef['eval']['filesOnly'] = true;
+        if ($this->get('file_filesOnly')) {
+            $fieldDefinition['eval']['filesOnly'] = true;
         }
     }
 
@@ -210,35 +206,35 @@ class TranslatedFile extends TranslatedReference
      */
     public function getFieldDefinition($arrOverrides = array())
     {
-        $arrFieldDef = parent::getFieldDefinition($arrOverrides);
+        $fieldDefinition = parent::getFieldDefinition($arrOverrides);
 
-        $arrFieldDef['inputType']          = 'fileTree';
-        $arrFieldDef['eval']['files']      = true;
-        $arrFieldDef['eval']['extensions'] = \Config::get('allowedDownload');
-        $arrFieldDef['eval']['multiple']   = (bool) $this->get('file_multiple');
+        $fieldDefinition['inputType']          = 'fileTree';
+        $fieldDefinition['eval']['files']      = true;
+        $fieldDefinition['eval']['extensions'] = Config::get('allowedDownload');
+        $fieldDefinition['eval']['multiple']   = (bool) $this->get('file_multiple');
 
         $widgetMode = $this->getOverrideValue('file_widgetMode', $arrOverrides);
 
         if (('normal' !== $widgetMode)
             && ((bool) $this->get('file_multiple'))
         ) {
-            $arrFieldDef['eval']['orderField'] = $this->getColName() . '__sort';
+            $fieldDefinition['eval']['orderField'] = $this->getColName() . '__sort';
         }
 
-        $arrFieldDef['eval']['isDownloads'] = ('downloads' === $widgetMode);
-        $arrFieldDef['eval']['isGallery']   = ('gallery' === $widgetMode);
+        $fieldDefinition['eval']['isDownloads'] = ('downloads' === $widgetMode);
+        $fieldDefinition['eval']['isGallery']   = ('gallery' === $widgetMode);
 
         if ($this->get('file_multiple')) {
-            $arrFieldDef['eval']['fieldType'] = 'checkbox';
+            $fieldDefinition['eval']['fieldType'] = 'checkbox';
         } else {
-            $arrFieldDef['eval']['fieldType'] = 'radio';
+            $fieldDefinition['eval']['fieldType'] = 'radio';
         }
 
         if ($this->get('file_customFiletree')) {
-            $this->handleCustomFileTree($arrFieldDef);
+            $this->handleCustomFileTree($fieldDefinition);
         }
 
-        return $arrFieldDef;
+        return $fieldDefinition;
     }
 
     /**
@@ -250,11 +246,9 @@ class TranslatedFile extends TranslatedReference
             return null;
         }
 
-        if (!$this->get('file_multiple')) {
-            return isset($varValue['value']['bin'][0]) ? $varValue['value']['bin'][0] : null;
-        }
-
-        return $varValue['value']['bin'];
+        return $this->get('file_multiple')
+                ? $varValue['value']['bin']
+                    : ($varValue['value']['bin'][0] ?? null);
     }
 
     /**
@@ -281,11 +275,9 @@ class TranslatedFile extends TranslatedReference
         $data = ToolboxFile::convertValuesToDatabase($mixValues);
 
         // Check single file or multiple file.
-        if ($this->get('file_multiple')) {
-            return \serialize($data);
-        }
-
-        return isset($data[0]) ? $data[0] : null;
+        return $this->get('file_multiple')
+                ? \serialize($data)
+                    : ($data[0] ?? null);
     }
 
     /**
@@ -293,22 +285,12 @@ class TranslatedFile extends TranslatedReference
      */
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
-        if (empty($arrValue)) {
-            return [
-                'tstamp'   => \time(),
-                'value'    => null,
-                'att_id'   => $this->get('id'),
-                'langcode' => $strLangCode,
-                'item_id'  => $intId,
-            ];
-        }
-
         return [
             'tstamp'   => \time(),
-            'value'    => $this->convert($arrValue['value']),
+            'value'    => (!empty($arrValue)) ? $this->convert($arrValue['value']) : null,
             'att_id'   => $this->get('id'),
             'langcode' => $strLangCode,
-            'item_id'  => $intId,
+            'item_id'  => $intId
         ];
     }
 
@@ -317,38 +299,38 @@ class TranslatedFile extends TranslatedReference
      */
     public function setTranslatedDataFor($arrValues, $strLangCode)
     {
-        $objDB = $this->getMetaModel()->getServiceContainer()->getDatabase();
+        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
         // First off determine those to be updated and those to be inserted.
-        $arrIds      = \array_keys($arrValues);
-        $arrExisting = \array_keys($this->getTranslatedDataFor($arrIds, $strLangCode));
-        $arrNewIds   = \array_diff($arrIds, $arrExisting);
+        $valueIds    = \array_keys($arrValues);
+        $existingIds = \array_keys($this->getTranslatedDataFor($valueIds, $strLangCode));
+        $newIds      = \array_diff($valueIds, $existingIds);
 
         // Update existing values - delete if empty.
-        $strQueryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
-        $strQueryDelete = 'DELETE FROM ' . $this->getValueTable();
+        $queryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
+        $queryDelete = 'DELETE FROM ' . $this->getValueTable();
 
-        foreach ($arrExisting as $intId) {
-            $arrWhere = $this->getWhere($intId, $strLangCode);
+        foreach ($existingIds as $existingId) {
+            $whereParts = $this->getWhere($existingId, $strLangCode);
 
-            if ($arrValues[$intId]['value']['bin'][0]) {
-                $objDB->prepare($strQueryUpdate . ($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : ''))
-                    ->set($this->getSetValues($arrValues[$intId], $intId, $strLangCode))
-                    ->execute(($arrWhere ? $arrWhere['params'] : null));
+            if ($arrValues[$existingId]['value']['bin'][0]) {
+                $database->prepare($queryUpdate . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
+                    ->set($this->getSetValues($arrValues[$existingId], $existingId, $strLangCode))
+                    ->execute(($whereParts ? $whereParts['params'] : null));
             } else {
-                $objDB->prepare($strQueryDelete . ($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : ''))
-                    ->execute(($arrWhere ? $arrWhere['params'] : null));
+                $database->prepare($queryDelete . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
+                    ->execute(($whereParts ? $whereParts['params'] : null));
             }
         }
 
         // Insert the new values - if not empty.
-        $strQueryInsert = 'INSERT INTO ' . $this->getValueTable() . ' %s';
-        foreach ($arrNewIds as $intId) {
-            if (!$arrValues[$intId]['value']['bin'][0]) {
+        $queryInsert = 'INSERT INTO ' . $this->getValueTable() . ' %s';
+        foreach ($newIds as $newId) {
+            if (!$arrValues[$newId]['value']['bin'][0]) {
                 continue;
             }
 
-            $objDB->prepare($strQueryInsert)
-                ->set($this->getSetValues($arrValues[$intId], $intId, $strLangCode))
+            $database->prepare($queryInsert)
+                ->set($this->getSetValues($arrValues[$newId], $newId, $strLangCode))
                 ->execute();
         }
     }
@@ -359,11 +341,11 @@ class TranslatedFile extends TranslatedReference
     public function getTranslatedDataFor($arrIds, $strLangCode)
     {
         $metaModel = $this->getMetaModel();
-        $arrValues = parent::getTranslatedDataFor($arrIds, $strLangCode);
 
-        foreach ($arrValues as $intId => $arrValue) {
-            $arrValues[$intId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
-                StringUtil::deserialize($arrValue['value'], true)
+        $values = parent::getTranslatedDataFor($arrIds, $strLangCode);
+        foreach ($values as $valueId => $value) {
+            $values[$valueId]['value'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
+                StringUtil::deserialize($value['value'], true)
             );
         }
 
@@ -371,11 +353,11 @@ class TranslatedFile extends TranslatedReference
             $orderAttribute = $metaModel->getAttribute($this->getColName() . '__sort');
 
             $sortedValues = $orderAttribute->getTranslatedDataFor($arrIds, $strLangCode);
-            foreach ($arrValues as $intId => $arrValue) {
-                $arrValues[$intId]['value_sorting'] = $sortedValues[$intId]['value_sorting'];
+            foreach ($values as $valueId => $value) {
+                $values[$valueId]['value_sorting'] = $sortedValues[$valueId]['value_sorting'];
             }
         }
 
-        return $arrValues;
+        return $values;
     }
 }
