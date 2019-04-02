@@ -24,6 +24,8 @@
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\StringUtil;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
@@ -141,11 +143,9 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function setTranslatedDataFor($values, $langCode)
     {
-        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
         // First off determine those to be updated and those to be inserted.
         $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($values), $langCode));
 
-        $queryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
         foreach ($existingIds as $existingId) {
             if (!isset($values[$existingId]['value_sorting']['bin'][0])
                 || !\count(($setValues = $this->getSetValues($values[$existingId], $existingId, $langCode)))
@@ -153,10 +153,10 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
                 continue;
             }
 
-            $whereParts = $this->getWhere($existingId, $langCode);
-            $database->prepare($queryUpdate . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
-                ->set($setValues)
-                ->execute(($whereParts ? $whereParts['params'] : null));
+            $builder = $this->connection->createQueryBuilder();
+            $builder->update($setValues);
+            $this->addWhere($builder, $existingId, $langCode);
+            $builder->execute();
         }
     }
 
@@ -176,41 +176,42 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     }
 
     /**
-     * Build a where clause for the given id(s) and language code.
+     * Add a where clause for the given id(s) and language code to the query builder.
      *
+     * @param QueryBuilder         $builder     The query builder.
      * @param string[]|string|null $mixIds      One, none or many ids to use.
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
-     * @return array
+     * @return void
      */
-    private function getWhere($mixIds, $mixLangCode = '')
+    private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
     {
-        $procedure  = 'att_id=?';
-        $parameters = [$this->get('id')];
-
-        if (!empty($mixIds)) {
-            if (\is_array($mixIds)) {
-                $procedure .= ' AND item_id IN (' . $this->parameterMask($mixIds) . ')';
-                $parameters = \array_merge($parameters, $mixIds);
-            } else {
-                $procedure   .= ' AND item_id=?';
-                $parameters[] = $mixIds;
-            }
-        }
+        $builder
+            ->andWhere($builder->expr()->eq('att_id', ':attributeID'))
+            ->setParameter(':attributeID', $this->get('id'));
 
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
-                $procedure .= ' AND langcode IN (' . $this->parameterMask($mixLangCode) . ')';
-                $parameters = \array_merge($parameters, $mixLangCode);
+                $builder
+                    ->andWhere($builder->expr()->in('langcode', ':langcodes'))
+                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
             } else {
-                $procedure   .= ' AND langcode=?';
-                $parameters[] = $mixLangCode;
+                $builder
+                    ->andWhere($builder->expr()->eq('langcode', ':langcode'))
+                    ->setParameter('langcode', $mixLangCode);
             }
         }
 
-        return [
-            'procedure' => $procedure,
-            'params'    => $parameters
-        ];
+        if (!empty($mixIds)) {
+            if (\is_array($mixIds)) {
+                $builder
+                    ->andWhere($builder->expr()->in('item_id', ':itemIDs'))
+                    ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
+            } else {
+                $builder
+                    ->andWhere($builder->expr()->eq('item_id', ':itemID'))
+                    ->setParameter('itemID', $mixIds);
+            }
+        }
     }
 }

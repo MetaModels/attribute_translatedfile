@@ -35,6 +35,7 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Validator;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
@@ -178,6 +179,9 @@ class TranslatedFile extends TranslatedReference
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
      * @return array
+     *
+     * @deprecated This is deprecated since 2.1 and where removed in 3.0.
+     *             Implement your own replacement for this.
      */
     protected function getWhere($mixIds, $mixLangCode = '')
     {
@@ -208,6 +212,46 @@ class TranslatedFile extends TranslatedReference
             'procedure' => $procedure,
             'params'    => $parameters
         ];
+    }
+
+    /**
+     * Add a where clause for the given id(s) and language code to the query builder.
+     *
+     * @param QueryBuilder         $builder     The query builder.
+     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     * @param string|string[]      $mixLangCode The language code/s to use, optional.
+     *
+     * @return void
+     */
+    private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
+    {
+        $builder
+            ->andWhere($builder->expr()->eq('att_id', ':attributeID'))
+            ->setParameter(':attributeID', $this->get('id'));
+
+        if (!empty($mixIds)) {
+            if (\is_array($mixIds)) {
+                $builder
+                    ->andWhere($builder->expr()->in('item_id', ':itemIDs'))
+                    ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
+            } else {
+                $builder
+                    ->andWhere($builder->expr()->eq('item_id', ':itemID'))
+                    ->setParameter('itemID', $mixIds);
+            }
+        }
+
+        if (!empty($mixLangCode)) {
+            if (\is_array($mixLangCode)) {
+                $builder
+                    ->andWhere($builder->expr()->in('langcode', ':langcodes'))
+                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
+            } else {
+                $builder
+                    ->andWhere($builder->expr()->eq('langcode', ':langcode'))
+                    ->setParameter('langcode', $mixLangCode);
+            }
+        }
     }
 
     /**
@@ -420,39 +464,35 @@ class TranslatedFile extends TranslatedReference
      */
     public function setTranslatedDataFor($arrValues, $strLangCode)
     {
-        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
         // First off determine those to be updated and those to be inserted.
         $valueIds    = \array_keys($arrValues);
         $existingIds = \array_keys($this->getTranslatedDataFor($valueIds, $strLangCode));
         $newIds      = \array_diff($valueIds, $existingIds);
 
         // Update existing values - delete if empty.
-        $queryUpdate = 'UPDATE ' . $this->getValueTable() . ' %s';
-        $queryDelete = 'DELETE FROM ' . $this->getValueTable();
-
         foreach ($existingIds as $existingId) {
-            $whereParts = $this->getWhere($existingId, $strLangCode);
+            $builder = $this->connection->createQueryBuilder();
 
             if ($arrValues[$existingId]['value']['bin'][0]) {
-                $database->prepare($queryUpdate . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
-                    ->set($this->getSetValues($arrValues[$existingId], $existingId, $strLangCode))
-                    ->execute(($whereParts ? $whereParts['params'] : null));
+                $builder->update($this->getValueTable());
             } else {
-                $database->prepare($queryDelete . ($whereParts ? ' WHERE ' . $whereParts['procedure'] : ''))
-                    ->execute(($whereParts ? $whereParts['params'] : null));
+                $builder->delete($this->getValueTable());
             }
+            
+            $this->addWhere($builder, $existingId, $strLangCode);
+            $builder->execute();
         }
 
         // Insert the new values - if not empty.
-        $queryInsert = 'INSERT INTO ' . $this->getValueTable() . ' %s';
         foreach ($newIds as $newId) {
             if (!$arrValues[$newId]['value']['bin'][0]) {
                 continue;
             }
 
-            $database->prepare($queryInsert)
-                ->set($this->getSetValues($arrValues[$newId], $newId, $strLangCode))
-                ->execute();
+            $this->connection->insert(
+                $this->getValueTable(),
+                $this->getSetValues($arrValues[$newId], $newId, $strLangCode)
+            );
         }
     }
 
