@@ -24,6 +24,7 @@ use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
+use MetaModels\AttributeFileBundle\MetaModelsAttributeFileBundle;
 use MetaModels\AttributeTranslatedFileBundle\MetaModelsAttributeTranslatedFileBundle;
 use MetaModels\CoreBundle\MetaModelsCoreBundle;
 
@@ -42,7 +43,8 @@ class Plugin implements BundlePluginInterface
                 ->setLoadAfter(
                     [
                         ContaoCoreBundle::class,
-                        MetaModelsCoreBundle::class
+                        MetaModelsCoreBundle::class,
+                        MetaModelsAttributeFileBundle::class
                     ]
                 )
                 ->setReplace(['metamodelsattribute_translatedfile'])

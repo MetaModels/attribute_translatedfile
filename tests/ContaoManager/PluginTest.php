@@ -24,6 +24,7 @@ use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
+use MetaModels\AttributeFileBundle\MetaModelsAttributeFileBundle;
 use MetaModels\AttributeTranslatedFileBundle\ContaoManager\Plugin;
 use MetaModels\CoreBundle\MetaModelsCoreBundle;
 use PHPUnit\Framework\TestCase;
@@ -63,7 +64,14 @@ class PluginTest extends TestCase
         /** @var BundleConfig $bundleConfig */
         $bundleConfig = $bundles[0];
 
-        $this->assertEquals($bundleConfig->getLoadAfter(), [ContaoCoreBundle::class, MetaModelsCoreBundle::class]);
+        $this->assertEquals(
+            $bundleConfig->getLoadAfter(),
+            [
+                ContaoCoreBundle::class,
+                MetaModelsCoreBundle::class,
+                MetaModelsAttributeFileBundle::class
+            ]
+        );
         $this->assertEquals($bundleConfig->getReplace(), ['metamodelsattribute_translatedfile']);
     }
 }
