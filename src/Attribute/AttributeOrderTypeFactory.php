@@ -65,7 +65,7 @@ class AttributeOrderTypeFactory implements IAttributeTypeFactory
      */
     public function createInstance($information, $metaModel)
     {
-        return new TranslatedFileOrder($metaModel, $information);
+        return new TranslatedFileOrder($metaModel, $information, $this->connection);
     }
 
     /**

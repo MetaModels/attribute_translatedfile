@@ -21,8 +21,14 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\DependencyInjection;
 
+use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttributeTranslatedFileExtension;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\AddAttributeInformation;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildAttributeListener;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attribute\RemoveTypeOptions;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\FilterSetting\RemoveAttIdOptions;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -57,7 +63,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
 
         $container
-            ->expects($this->exactly(2))
+            ->expects($this->exactly(8))
             ->method('setDefinition')
             ->withConsecutive(
                 [
@@ -74,11 +80,90 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                     )
                 ],
                 [
-                    ImageSizeOptions::class,
+                    'metamodels.attribute_translatedfile_order.factory',
                     $this->callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(AttributeOrderTypeFactory::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(AddAttributeInformation::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener.build_data_definition',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(BuildDataDefinitionListener::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener.build_attribute',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(BuildAttributeListener::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener.image_size_options',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(ImageSizeOptions::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener.remove_type_options',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(RemoveTypeOptions::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    'metamodels.attribute_translatedfile.event_listener.remove_att_id_options',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(RemoveAttIdOptions::class, $value->getClass());
                             $this->assertCount(1, $value->getTag('kernel.event_listener'));
 
                             return true;

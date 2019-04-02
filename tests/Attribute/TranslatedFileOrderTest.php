@@ -11,8 +11,6 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels/attribute_translatedfile
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     David Greminger <david.greminger@1up.io>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
@@ -21,6 +19,7 @@
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\Attribute;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFileOrder;
 use PHPUnit\Framework\TestCase;
 
@@ -61,6 +60,13 @@ class TranslatedFileOrderTest extends TestCase
         return $metaModel;
     }
 
+    private function mockConnection()
+    {
+        return $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
     /**
      * Test that the attribute can be instantiated.
      *
@@ -68,7 +74,7 @@ class TranslatedFileOrderTest extends TestCase
      */
     public function testInstantiation()
     {
-        $text = new TranslatedFileOrder($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFileOrder', $text);
+        $text = new TranslatedFileOrder($this->mockMetaModel('en', 'en'), [], $this->mockConnection());
+        $this->assertInstanceOf(TranslatedFileOrder::class, $text);
     }
 }
