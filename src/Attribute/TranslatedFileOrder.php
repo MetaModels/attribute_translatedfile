@@ -25,9 +25,12 @@ namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
+use MetaModels\AttributeFileBundle\Doctrine\DBAL\Platforms\Keywords\NotSupportedKeywordList;
 use MetaModels\Helper\ToolboxFile;
 
 /**
@@ -35,6 +38,13 @@ use MetaModels\Helper\ToolboxFile;
  */
 class TranslatedFileOrder extends TranslatedReference implements IInternal
 {
+    /**
+     * The platform reserved keyword list.
+     *
+     * @var KeywordList
+     */
+    private $platformReservedWord;
+
     /**
      * {@inheritdoc}
      */
@@ -72,7 +82,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         return $this->get('file_multiple')
             ? $varValue['value_sorting']['bin']
-                : ($varValue['value_sorting']['bin'][0] ?? null);
+            : ($varValue['value_sorting']['bin'][0] ?? null);
     }
 
     /**
@@ -80,10 +90,11 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function widgetToValue($varValue, $itemId)
     {
+        $sortingValue = ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue);
         return [
-            'tstamp'        => \time(),
-            'value_sorting' => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
-            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort'))
+            $this->quoteReservedWord('tstamp')        => \time(),
+            $this->quoteReservedWord('value_sorting') => $sortingValue,
+            $this->quoteReservedWord('att_id')        => \substr($this->get('id'), 0, -\strlen('__sort'))
         ];
     }
 
@@ -154,7 +165,12 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             }
 
             $builder = $this->connection->createQueryBuilder();
-            $builder->update($setValues);
+            $builder->update($this->quoteReservedWord($this->getValueTable()));
+            foreach ($setValues as $setValueKey => $setValue) {
+                $builder->set($this->quoteReservedWord($setValueKey), ':' . $setValueKey);
+                $builder->setParameter(':' . $setValueKey, $setValue);
+            }
+
             $this->addWhere($builder, $existingId, $langCode);
             $builder->execute();
         }
@@ -213,5 +229,30 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
                     ->setParameter('itemID', $mixIds);
             }
         }
+    }
+
+    /**
+     * Quote the reserved platform key word.
+     *
+     * @param string $word The key word.
+     *
+     * @return string
+     */
+    private function quoteReservedWord(string $word): string
+    {
+        if (null === $this->platformReservedWord) {
+            try {
+                $this->platformReservedWord = $this->connection->getDatabasePlatform()->getReservedKeywordsList();
+            } catch (DBALException $exception) {
+                // Add the not support key word list, if the platform has not a list of keywords.
+                $this->platformReservedWord = new NotSupportedKeywordList();
+            }
+        }
+
+        if (false === $this->platformReservedWord->isKeyword($word)) {
+            return $word;
+        }
+
+        return $this->connection->quoteIdentifier($word);
     }
 }
