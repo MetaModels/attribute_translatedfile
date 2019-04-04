@@ -20,21 +20,37 @@
  */
 
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
+use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
+use MetaModels\Attribute\TranslatedFile\AttributeOrderTypeFactory;
 use MetaModels\Attribute\TranslatedFile\AttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
+use MetaModels\Attribute\TranslatedFile\Subscriber;
+use MetaModels\Events\Attribute\TranslatedFile\AddAttributeInformation;
+use MetaModels\Events\DcGeneral\Table\Attribute\TranslatedFile\RemoveTypeOptions;
+use MetaModels\Events\DcGeneral\Table\FilterSetting\TranslatedFile\RemoveAttIdOptions;
+use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Events\Attribute\TranslatedFile\ImageSizeOptions;
 use MetaModels\MetaModelsEvents;
 
-return array
-(
-    MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE => array(
+return [
+    MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE => [
         function (CreateAttributeFactoryEvent $event) {
             $factory = $event->getFactory();
             $factory->addTypeFactory(new AttributeTypeFactory());
+            $factory->addTypeFactory(new AttributeOrderTypeFactory());
         }
-    ),
-
-    GetPropertyOptionsEvent::NAME => array(
-        array(new ImageSizeOptions(), 'getPropertyOptions')
-    )
-);
+    ],
+    CollectMetaModelAttributeInformationEvent::NAME => [
+        [[new AddAttributeInformation(), 'addInformation'], -1]
+    ],
+    MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND   => [
+        function (MetaModelsBootEvent $event) {
+            new Subscriber($event->getServiceContainer());
+        }
+    ],
+    GetPropertyOptionsEvent::NAME => [
+        [new ImageSizeOptions(), 'getPropertyOptions'],
+        [[new RemoveTypeOptions(), 'removeOption'], -1],
+        [[new RemoveAttIdOptions(), 'removeOption'], -1]
+    ]
+];

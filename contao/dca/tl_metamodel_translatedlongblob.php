@@ -21,46 +21,38 @@
 /**
  * Table tl_metamodel_translatedlongblob
  */
-$GLOBALS['TL_DCA']['tl_metamodel_translatedlongblob'] = array
-(
+$GLOBALS['TL_DCA']['tl_metamodel_translatedlongblob'] = [
     // Config
-    'config' => array
-    (
-        'sql' => array
-        (
-            'keys' => array
-            (
+    'config' => [
+        'sql' => [
+            'keys' => [
                 'id'                      => 'primary',
                 'att_id,item_id,langcode' => 'index'
-            )
-        )
-    ),
+            ]
+        ]
+    ],
     // Fields
-    'fields' => array
-    (
-        'id' => array
-        (
+    'fields' => [
+        'id' => [
             'sql'                     => 'int(10) unsigned NOT NULL auto_increment'
-        ),
-        'tstamp' => array
-        (
+        ],
+        'tstamp' => [
             'sql'                     => 'int(10) unsigned NOT NULL default \'0\''
-        ),
-        'att_id' => array
-        (
+        ],
+        'att_id' => [
             'sql'                     => 'int(10) unsigned NOT NULL default \'0\''
-        ),
-        'item_id' => array
-        (
+        ],
+        'item_id' => [
             'sql'                     => 'int(10) unsigned NOT NULL default \'0\''
-        ),
-        'langcode' => array
-        (
+        ],
+        'langcode' => [
             'sql'                     => 'varchar(5) NOT NULL default \'\''
-        ),
-        'value' => array
-        (
+        ],
+        'value' => [
             'sql'                     => 'longblob NULL'
-        )
-    )
-);
+        ],
+        'value_sorting' => [
+            'sql'                     => 'longblob NULL'
+        ]
+    ]
+];

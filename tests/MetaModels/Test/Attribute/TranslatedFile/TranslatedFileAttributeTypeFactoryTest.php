@@ -20,13 +20,22 @@
 
 namespace MetaModels\Test\Attribute\TranslatedFile;
 
+use MetaModels\Attribute\Events\CollectMetaModelAttributeInformationEvent;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\IAttributeTypeFactory;
+use MetaModels\Attribute\TranslatedFile\AttributeOrderTypeFactory;
 use MetaModels\Attribute\TranslatedFile\AttributeTypeFactory;
+use MetaModels\Events\Attribute\TranslatedFile\AddAttributeInformation;
 use MetaModels\IMetaModel;
 use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Test the attribute factory.
+ *
+ * @covers \MetaModels\Attribute\TranslatedFile\AttributeTypeFactory
+ * @covers \MetaModels\Attribute\TranslatedFile\AttributeOrderTypeFactory
+ * @covers \MetaModels\Events\Attribute\TranslatedFile\AddAttributeInformation
  */
 class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
 {
@@ -43,7 +52,8 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMockForAbstractClass('MetaModels\IMetaModel');
+        $metaModel      = $this->getMockForAbstractClass('MetaModels\IMetaModel');
+        $mockAttributes = [];
 
         $metaModel
             ->expects($this->any())
@@ -60,7 +70,78 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
             ->method('getFallbackLanguage')
             ->will($this->returnValue($fallbackLanguage));
 
+        $metaModel
+            ->expects($this->any())
+            ->method('addAttribute')
+            ->will(
+                $this->returnCallback(
+                    function (IAttribute $objAttribute) use ($metaModel, &$mockAttributes) {
+                        $mockAttributes[$objAttribute->getColName()] = $objAttribute;
+
+                        return $metaModel;
+                    }
+                )
+            );
+
+        $metaModel
+            ->expects($this->any())
+            ->method('hasAttribute')
+            ->will(
+                $this->returnCallback(
+                    function ($strAttributeName) use (&$mockAttributes) {
+                        return array_key_exists($strAttributeName, $mockAttributes);
+                    }
+                )
+            );
+
+        $metaModel
+            ->expects($this->any())
+            ->method('getAttribute')
+            ->will(
+                $this->returnCallback(
+                    function ($strAttributeName) use (&$mockAttributes) {
+                        return array_key_exists($strAttributeName, $mockAttributes)
+                            ? $mockAttributes[$strAttributeName]
+                            : null;
+                    }
+                )
+            );
+
         return $metaModel;
+    }
+
+    private function mockAttributeFactory()
+    {
+        $factory = $this->getMockForAbstractClass('\MetaModels\Attribute\IAttributeFactory');
+
+        $factories = [
+            'translatedfile'     => new AttributeTypeFactory(),
+            'translatedfilesort' => new AttributeOrderTypeFactory()
+        ];
+
+        $factory
+            ->expects($this->any())
+            ->method('getTypeFactory')
+            ->will(
+                $this->returnCallback(
+                    function ($typeFactory) use ($factories) {
+                        return isset($factories[(string) $typeFactory]) ? $factories[(string) $typeFactory] : null;
+                    }
+                )
+            );
+
+        return $factory;
+    }
+
+    private function createEventDispatcher()
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(
+            CollectMetaModelAttributeInformationEvent::NAME,
+            [new AddAttributeInformation(), 'addInformation']
+        );
+
+        return $dispatcher;
     }
 
     /**
@@ -70,7 +151,7 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function getAttributeFactories()
     {
-        return array(new AttributeTypeFactory());
+        return [new AttributeTypeFactory()];
     }
 
     /**
@@ -78,14 +159,61 @@ class TranslatedFileAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      *
      * @return void
      */
-    public function testCreateSelect()
+    public function testCreateSelectOfNotSortableFile()
     {
-        $factory   = new AttributeTypeFactory();
-        $attribute = $factory->createInstance(
-            array(),
-            $this->mockMetaModel('mm_test', 'de', 'en')
+        $metaModel  = $this->mockMetaModel('mm_test', 'de', 'en');
+        $factory    = $this->mockAttributeFactory();
+        $dispatcher = $this->createEventDispatcher();
+        $event      = new CollectMetaModelAttributeInformationEvent($metaModel);
+        $event->setAttributeInformation(
+            ['foo' => ['type' => 'translatedfile', 'colname' => 'foo', 'file_multiple' => null]]
         );
+        $dispatcher->dispatch($event::NAME, $event);
 
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFile', $attribute);
+        foreach ($event->getAttributeInformation() as $name => $information) {
+            if (null === ($typeFactory = $factory->getTypeFactory($information['type']))) {
+                continue;
+            }
+
+            $metaModel->addAttribute($typeFactory->createInstance($information, $metaModel));
+        }
+
+        $this->assertTrue($metaModel->hasAttribute('foo'));
+        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFile', $metaModel->getAttribute('foo'));
+        $this->assertFalse($metaModel->hasAttribute('foo__sort'));
+        $this->assertNull($metaModel->getAttribute('foo_sort'));
+    }
+
+    /**
+     * Test creation of an translated select.
+     *
+     * @return void
+     */
+    public function testCreateSelectOfSortableFile()
+    {
+        $metaModel  = $this->mockMetaModel('mm_test', 'de', 'en');
+        $factory    = $this->mockAttributeFactory();
+        $dispatcher = $this->createEventDispatcher();
+        $event      = new CollectMetaModelAttributeInformationEvent($metaModel);
+        $event->setAttributeInformation(
+            ['foo' => ['type' => 'translatedfile', 'colname' => 'foo', 'file_multiple' => '1']]
+        );
+        $dispatcher->dispatch($event::NAME, $event);
+
+        foreach ($event->getAttributeInformation() as $name => $information) {
+            if (null === ($typeFactory = $factory->getTypeFactory($information['type']))) {
+                continue;
+            }
+
+            $metaModel->addAttribute($typeFactory->createInstance($information, $metaModel));
+        }
+
+        $this->assertTrue($metaModel->hasAttribute('foo'));
+        $this->assertInstanceOf('MetaModels\Attribute\TranslatedFile\TranslatedFile', $metaModel->getAttribute('foo'));
+        $this->assertTrue($metaModel->hasAttribute('foo__sort'));
+        $this->assertInstanceOf(
+            'MetaModels\Attribute\TranslatedFile\TranslatedFileOrder',
+            $metaModel->getAttribute('foo__sort')
+        );
     }
 }

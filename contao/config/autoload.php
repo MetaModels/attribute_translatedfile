@@ -23,6 +23,8 @@
 /**
  * Register the templates
  */
-TemplateLoader::addFiles(array(
-    'mm_attr_translatedfile'              => 'system/modules/metamodelsattribute_translatedfile/templates',
-));
+TemplateLoader::addFiles(
+    [
+        'mm_attr_translatedfile' => 'system/modules/metamodelsattribute_translatedfile/templates'
+    ]
+);
