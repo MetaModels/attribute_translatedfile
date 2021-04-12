@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -37,6 +37,8 @@ use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 /**
  * This test case test the extension.
+ *
+ * @covers \MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttributeTranslatedFileExtension
  */
 class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
 {
@@ -49,8 +51,8 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
     {
         $extension = new MetaModelsAttributeTranslatedFileExtension();
 
-        $this->assertInstanceOf(MetaModelsAttributeTranslatedFileExtension::class, $extension);
-        $this->assertInstanceOf(ExtensionInterface::class, $extension);
+        self::assertInstanceOf(MetaModelsAttributeTranslatedFileExtension::class, $extension);
+        self::assertInstanceOf(ExtensionInterface::class, $extension);
     }
 
     /**
@@ -63,12 +65,12 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
 
         $container
-            ->expects($this->exactly(8))
+            ->expects(self::exactly(8))
             ->method('setDefinition')
             ->withConsecutive(
                 [
                     'metamodels.attribute_translatedfile.factory',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -81,7 +83,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile_order.factory',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -94,7 +96,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -107,7 +109,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener.build_data_definition',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -120,7 +122,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener.build_attribute',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -133,7 +135,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener.image_size_options',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -146,7 +148,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener.remove_type_options',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
@@ -159,7 +161,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                 ],
                 [
                     'metamodels.attribute_translatedfile.event_listener.remove_att_id_options',
-                    $this->callback(
+                    self::callback(
                         function ($value) {
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);

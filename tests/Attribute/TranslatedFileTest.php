@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@
  * @author     David Greminger <david.greminger@1up.io>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -27,6 +27,7 @@ use Doctrine\DBAL\Connection;
 use MetaModels\AttributeTranslatedFileBundle\Attribute\TranslatedFile;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -42,26 +43,26 @@ class TranslatedFileTest extends TestCase
      * @param string $language         The language.
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return \MetaModels\IMetaModel
+     * @return IMetaModel
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getTableName')
-            ->will($this->returnValue('mm_unittest'));
+            ->willReturn('mm_unittest');
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getActiveLanguage')
-            ->will($this->returnValue($language));
+            ->willReturn($language);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getFallbackLanguage')
-            ->will($this->returnValue($fallbackLanguage));
+            ->willReturn($fallbackLanguage);
 
         return $metaModel;
     }
@@ -69,7 +70,7 @@ class TranslatedFileTest extends TestCase
     /**
      * Mock the database connection.
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     * @return MockObject|Connection
      */
     private function mockConnection()
     {
@@ -135,6 +136,6 @@ class TranslatedFileTest extends TestCase
             $this->mockFileRepository(),
             $this->mockConfig()
         );
-        $this->assertInstanceOf(TranslatedFile::class, $text);
+        self::assertInstanceOf(TranslatedFile::class, $text);
     }
 }
