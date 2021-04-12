@@ -185,7 +185,7 @@ class AddAttributeInformationTest extends TestCase
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
         $event     = new CollectMetaModelAttributeInformationEvent($metaModel);
         $event->setAttributeInformation($information);
-        $dispatcher->dispatch($event::NAME, $event);
+        $dispatcher->dispatch($event, $event::NAME);
 
         self::assertSame($expected, $event->getAttributeInformation());
     }

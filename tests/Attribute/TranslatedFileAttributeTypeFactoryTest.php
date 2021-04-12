@@ -231,7 +231,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
         $event->setAttributeInformation(
             ['foo' => ['type' => 'translatedfile', 'colname' => 'foo', 'file_multiple' => null]]
         );
-        $dispatcher->dispatch($event::NAME, $event);
+        $dispatcher->dispatch($event, $event::NAME);
 
         foreach ($event->getAttributeInformation() as $name => $information) {
             if (null === ($typeFactory = $factory->getTypeFactory($information['type']))) {
@@ -261,7 +261,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
         $event->setAttributeInformation(
             ['foo' => ['type' => 'translatedfile', 'colname' => 'foo', 'file_multiple' => '1']]
         );
-        $dispatcher->dispatch($event::NAME, $event);
+        $dispatcher->dispatch($event, $event::NAME);
 
         foreach ($event->getAttributeInformation() as $name => $information) {
             if (null === ($typeFactory = $factory->getTypeFactory($information['type']))) {

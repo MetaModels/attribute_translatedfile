@@ -109,7 +109,7 @@ class RemoveTypeOptionsTest extends TestCase
         $event = new GetPropertyOptionsEvent($environment, $this->mockModel());
         $event->setPropertyName($propertyName);
         $event->setOptions($options);
-        $dispatcher->dispatch($event::NAME, $event);
+        $dispatcher->dispatch($event, $event::NAME);
 
         self::assertSame($expected, $event->getOptions());
     }
