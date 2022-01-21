@@ -1,43 +1,44 @@
 <?php if (is_array($this->src)): ?>
-    <ul>
+    <ul class="file<?= $this->additional_class ?>">
         <?php foreach ($this->src as $arrFile):
-            $strTitle =
+            $title =
                 ($arrFile['title']) ? $arrFile['title'] : (($arrFile['alt']) ? $arrFile['alt'] : $arrFile['file']);
-            $strAlt = ($arrFile['caption']) ? $arrFile['caption'] : ''; ?>
-            <li class="<?php echo $arrFile['class']; ?>">
+            $alt   = ($arrFile['caption']) ? $arrFile['caption'] : '';
+            ?>
+            <li class="<?= $arrFile['class'] ?>">
                 <?php if ($arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
-                <figure class="image_container<?= $arrFile['floatClass'] ?>"<?php if ($arrFile['margin']): ?> style="<?= $arrFile['margin'] ?>"<?php endif; ?>>
-                    <?php endif; ?>
+                    <figure class="image_container<?= $arrFile['floatClass'] ?>"<?php if ($arrFile['margin']): ?> style="<?= $arrFile['margin'] ?>"<?php endif; ?>>
+                <?php endif; ?>
+
                     <?php if ($this->settings->get('file_showLink')): ?>
-                    <?php if ($this->settings->get('file_showImage')): ?>
-                    <a class="cboxElement" data-lightbox="<?php echo $arrFile['lb']; ?>"
-                       title="<?php echo $strTitle; ?>" href="<?php echo $arrFile['file']; ?>">
+                        <?php if ($this->settings->get('file_showImage')): ?>
+                            <a class="cboxElement" data-lightbox="<?= $arrFile['lb'] ?>" title="<?= $title ?>"
+                               href="<?= $arrFile['imageUrl'] ?>">
                         <?php else: ?>
-                        <a title="<?php echo $strTitle; ?>" href="<?php echo $arrFile['url']; ?>">
-                            <?php endif; ?>
-                            <?php endif; ?>
+                            <a title="<?= $title ?>" href="<?= $arrFile['url'] ?>">
+                        <?php endif; ?>
+                    <?php endif; ?>
 
-                            <?php if (!$arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
-                                <?php if ($arrFile['isGdImage'] || $arrFile['isSvgImage']): ?>
-                                    <?php echo $this->generateImage($arrFile['src'], $strAlt); ?>
-                                <?php endif; ?>
-                            <?php elseif ($arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
-                                <?php $this->insert('picture_default', $arrFile['picture']); ?>
-                            <?php else: ?>
-                                <img src="<?php echo $arrFile['icon']; ?>"
-                                     alt="<?php echo $strAlt; ?>"/> <?php echo $strTitle; ?> <span
-                                        class="size"><?php echo $arrFile['sizetext']; ?></span>
-                            <?php endif; ?>
+                    <?php if (!$arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
+                        <?php if ($arrFile['isGdImage'] || $arrFile['isSvgImage']): ?>
+                            <?= $this->generateImage($arrFile['src'], $alt) ?>
+                        <?php endif; ?>
+                    <?php elseif ($arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
+                        <?php $this->insert('picture_default', $arrFile['picture']); ?>
+                    <?php else: ?>
+                        <img src="<?= $arrFile['icon'] ?>" alt="<?= $alt ?>" /><?= $title ?> <span
+                                class="size"><?= $arrFile['sizetext'] ?></span>
+                    <?php endif; ?>
 
-                            <?php if ($this->settings->get('file_showLink')): ?>
+                    <?php if ($this->settings->get('file_showLink')): ?>
                         </a>
                     <?php endif; ?>
 
-                        <?php if ($arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
-                        <?php if ($arrFile['caption']): ?>
-                            <figcaption class="caption"><?= $arrFile['caption'] ?></figcaption>
-                        <?php endif; ?>
-                </figure>
+                <?php if ($arrFile['isPicture'] && $this->settings->get('file_showImage')): ?>
+                    <?php if ($arrFile['caption']): ?>
+                        <figcaption class="caption"><?= $arrFile['caption'] ?></figcaption>
+                    <?php endif; ?>
+                    </figure>
                 <?php endif; ?>
             </li>
         <?php endforeach; ?>
