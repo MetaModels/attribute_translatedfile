@@ -310,7 +310,7 @@ class TranslatedFile extends TranslatedReference
         if ($settings->get('file_imageSize')) {
             $toolbox->setResizeImages($settings->get('file_imageSize'));
         }
-//dd($rowData, $value['value']);
+
         if (isset($value['value'])) {
             foreach ($value['value'] as $strFile) {
                 $toolbox->addPathById($strFile);
