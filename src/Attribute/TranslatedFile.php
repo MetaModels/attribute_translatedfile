@@ -324,6 +324,7 @@ class TranslatedFile extends TranslatedReference
         }
 
         $data = [];
+        $toolbox->withDownloadKeys($settings->get('file_showLink') && $settings->get('file_protectedDownload'));
         $toolbox->resolveFiles();
         if ('manual' !== $settings->get('file_sortBy')) {
             $data = $toolbox->sortFiles($settings->get('file_sortBy'));
