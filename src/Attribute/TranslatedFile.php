@@ -35,11 +35,8 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Validator;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\TranslatedReference;
-use MetaModels\AttributeFileBundle\Doctrine\DBAL\Platforms\Keywords\NotSupportedKeywordList;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
@@ -83,13 +80,6 @@ class TranslatedFile extends TranslatedReference
      * @var Adapter|Config|null
      */
     private $config;
-
-    /**
-     * The platform reserved keyword list.
-     *
-     * @var KeywordList
-     */
-    private $platformReservedWord;
 
     /**
      * {@inheritDoc}
@@ -185,7 +175,6 @@ class TranslatedFile extends TranslatedReference
      * Build a where clause for the given id(s) and language code.
      *
      * @param string[]|string|null $mixIds      One, none or many ids to use.
-     *
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
      * @return array
@@ -195,25 +184,25 @@ class TranslatedFile extends TranslatedReference
      */
     protected function getWhere($mixIds, $mixLangCode = '')
     {
-        $procedure  = 'att_id=?';
+        $procedure  = 't.att_id=?';
         $parameters = [$this->get('id')];
 
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
-                $procedure .= ' AND item_id IN (' . $this->parameterMask($mixIds) . ')';
+                $procedure .= ' AND t.item_id IN (' . $this->parameterMask($mixIds) . ')';
                 $parameters = \array_merge($parameters, $mixIds);
             } else {
-                $procedure   .= ' AND item_id=?';
+                $procedure   .= ' AND t.item_id=?';
                 $parameters[] = $mixIds;
             }
         }
 
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
-                $procedure .= ' AND langcode IN (' . $this->parameterMask($mixLangCode) . ')';
+                $procedure .= ' AND t.langcode IN (' . $this->parameterMask($mixLangCode) . ')';
                 $parameters = \array_merge($parameters, $mixLangCode);
             } else {
-                $procedure   .= ' AND langcode=?';
+                $procedure   .= ' AND t.langcode=?';
                 $parameters[] = $mixLangCode;
             }
         }
@@ -236,17 +225,17 @@ class TranslatedFile extends TranslatedReference
     private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
     {
         $builder
-            ->andWhere($builder->expr()->eq($this->quoteReservedWord('att_id'), ':attributeID'))
+            ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
             ->setParameter(':attributeID', $this->get('id'));
 
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
                 $builder
-                    ->andWhere($builder->expr()->in($this->quoteReservedWord('item_id'), ':itemIDs'))
+                    ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))
                     ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq($this->quoteReservedWord('item_id'), ':itemID'))
+                    ->andWhere($builder->expr()->eq('t.item_id', ':itemID'))
                     ->setParameter('itemID', $mixIds);
             }
         }
@@ -254,11 +243,11 @@ class TranslatedFile extends TranslatedReference
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
                 $builder
-                    ->andWhere($builder->expr()->in($this->quoteReservedWord('langcode'), ':langcodes'))
+                    ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
                     ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq($this->quoteReservedWord('langcode'), ':langcode'))
+                    ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
                     ->setParameter('langcode', $mixLangCode);
             }
         }
@@ -461,9 +450,9 @@ class TranslatedFile extends TranslatedReference
     public function widgetToValue($varValue, $itemId)
     {
         return [
-            $this->quoteReservedWord('tstamp') => \time(),
-            $this->quoteReservedWord('value')  => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
-            $this->quoteReservedWord('att_id') => $this->get('id')
+            'tstamp' => \time(),
+            'value'  => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
+            'att_id' => $this->get('id')
         ];
     }
 
@@ -509,18 +498,17 @@ class TranslatedFile extends TranslatedReference
         $newIds      = \array_diff($valueIds, $existingIds);
 
         // Update existing values - delete if empty.
+        $builder = $this->connection->createQueryBuilder();
         foreach ($existingIds as $existingId) {
-            $builder = $this->connection->createQueryBuilder();
-
             if ($arrValues[$existingId]['value']['bin'][0]) {
                 $setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode);
-                $builder->update($this->quoteReservedWord($this->getValueTable()));
+                $builder->update($this->getValueTable(), 't');
                 foreach ($setValues as $setValueKey => $setValue) {
-                    $builder->set($this->quoteReservedWord($setValueKey), ':' . $setValueKey);
+                    $builder->set('t.' . $setValueKey, ':' . $setValueKey);
                     $builder->setParameter(':' . $setValueKey, $setValue);
                 }
             } else {
-                $builder->delete($this->quoteReservedWord($this->getValueTable()));
+                $builder->delete($this->getValueTable());
             }
 
             $this->addWhere($builder, $existingId, $strLangCode);
@@ -528,17 +516,19 @@ class TranslatedFile extends TranslatedReference
         }
 
         // Insert the new values - if not empty.
+        $builder = $this->connection->createQueryBuilder();
+        $builder->insert($this->getValueTable());
         foreach ($newIds as $newId) {
             if (!$arrValues[$newId]['value']['bin'][0]) {
                 continue;
             }
 
-            $setValues = [];
             foreach ($this->getSetValues($arrValues[$newId], $newId, $strLangCode) as $setValueKey => $setValue) {
-                $setValues[$this->quoteReservedWord($setValueKey)] = $setValue;
+                $builder->setValue($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
+                $builder->setParameter($setValueKey, $setValue);
+                $setValues[$this->getValueTable() . '.' . $setValueKey] = $setValue;
             }
-
-            $this->connection->insert($this->quoteReservedWord($this->getValueTable()), $setValues);
+            $builder->execute();
         }
     }
 
@@ -566,30 +556,5 @@ class TranslatedFile extends TranslatedReference
         }
 
         return $values;
-    }
-
-    /**
-     * Quote the reserved platform key word.
-     *
-     * @param string $word The key word.
-     *
-     * @return string
-     */
-    private function quoteReservedWord(string $word): string
-    {
-        if (null === $this->platformReservedWord) {
-            try {
-                $this->platformReservedWord = $this->connection->getDatabasePlatform()->getReservedKeywordsList();
-            } catch (DBALException $exception) {
-                // Add the not support key word list, if the platform has not a list of keywords.
-                $this->platformReservedWord = new NotSupportedKeywordList();
-            }
-        }
-
-        if (false === $this->platformReservedWord->isKeyword($word)) {
-            return $word;
-        }
-
-        return $this->connection->quoteIdentifier($word);
     }
 }
