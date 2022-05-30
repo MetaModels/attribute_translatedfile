@@ -21,6 +21,7 @@
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     David Molineus <david.molineus@netzmacht.de>
+ * @author     Oliver Willmes <info@oliverwillmes.de>
  * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -222,20 +223,20 @@ class TranslatedFile extends TranslatedReference
      *
      * @return void
      */
-    private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
+    private function addWhere(QueryBuilder $builder, $mixIds, $table, $mixLangCode = ''): void
     {
         $builder
-            ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
+            ->andWhere($builder->expr()->eq( $table . '.att_id', ':attributeID'))
             ->setParameter(':attributeID', $this->get('id'));
 
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
                 $builder
-                    ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))
+                    ->andWhere($builder->expr()->in( $table . '.item_id', ':itemIDs'))
                     ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq('t.item_id', ':itemID'))
+                    ->andWhere($builder->expr()->eq( $table . '.item_id', ':itemID'))
                     ->setParameter('itemID', $mixIds);
             }
         }
@@ -243,11 +244,11 @@ class TranslatedFile extends TranslatedReference
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
                 $builder
-                    ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
+                    ->andWhere($builder->expr()->in( $table . '.langcode', ':langcodes'))
                     ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
+                    ->andWhere($builder->expr()->eq( $table . '.langcode', ':langcode'))
                     ->setParameter('langcode', $mixLangCode);
             }
         }
@@ -502,16 +503,16 @@ class TranslatedFile extends TranslatedReference
         foreach ($existingIds as $existingId) {
             if ($arrValues[$existingId]['value']['bin'][0]) {
                 $setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode);
-                $builder->update($this->getValueTable(), 't');
+                $builder->update($this->getValueTable());
                 foreach ($setValues as $setValueKey => $setValue) {
-                    $builder->set('t.' . $setValueKey, ':' . $setValueKey);
+                    $builder->set($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
                     $builder->setParameter(':' . $setValueKey, $setValue);
                 }
             } else {
                 $builder->delete($this->getValueTable());
             }
 
-            $this->addWhere($builder, $existingId, $strLangCode);
+            $this->addWhere($builder, $existingId, $this->getValueTable(), $strLangCode);
             $builder->execute();
         }
 
