@@ -227,7 +227,7 @@ class TranslatedFile extends TranslatedReference
     {
         $builder
             ->andWhere($builder->expr()->eq( $table . '.att_id', ':attributeID'))
-            ->setParameter(':attributeID', $this->get('id'));
+            ->setParameter('attributeID', $this->get('id'));
 
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
@@ -506,14 +506,14 @@ class TranslatedFile extends TranslatedReference
                 $builder->update($this->getValueTable());
                 foreach ($setValues as $setValueKey => $setValue) {
                     $builder->set($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
-                    $builder->setParameter(':' . $setValueKey, $setValue);
+                    $builder->setParameter($setValueKey, $setValue);
                 }
             } else {
                 $builder->delete($this->getValueTable());
             }
 
             $this->addWhere($builder, $existingId, $this->getValueTable(), $strLangCode);
-            $builder->execute();
+            $builder->executeQuery();
         }
 
         // Insert the new values - if not empty.
@@ -529,7 +529,7 @@ class TranslatedFile extends TranslatedReference
                 $builder->setParameter($setValueKey, $setValue);
                 $setValues[$this->getValueTable() . '.' . $setValueKey] = $setValue;
             }
-            $builder->execute();
+            $builder->executeQuery();
         }
     }
 
