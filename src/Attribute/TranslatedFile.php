@@ -519,8 +519,9 @@ class TranslatedFile extends TranslatedReference
         // Insert the new values - if not empty.
         $builder = $this->connection->createQueryBuilder();
         $builder->insert($this->getValueTable());
+
         foreach ($newIds as $newId) {
-            if (!$arrValues[$newId]['value']['bin'][0]) {
+            if (!($arrValues[$newId]['value']['bin'][0] ?? false)) {
                 continue;
             }
 
