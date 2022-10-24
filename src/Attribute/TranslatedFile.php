@@ -263,10 +263,10 @@ class TranslatedFile extends TranslatedReference
     {
         parent::prepareTemplate($template, $rowData, $settings);
 
-        $value = $rowData[$this->getColName()]['value'];
+        $value = $rowData[$this->getColName()]['value'] ?? null;
 
         // No data and show image, check placeholder.
-        if (!$value['bin'] ?? null) {
+        if (!($value['bin'] ?? null)) {
             if (null === $settings->get('file_showImage')
                 || null === ($placeholder = $settings->get('file_placeholder'))) {
                 $template->files = [];
@@ -275,7 +275,7 @@ class TranslatedFile extends TranslatedReference
                 return;
             }
 
-            $value['bin'][] = $placeholder;
+            $value['bin'][]   = $placeholder;
             $value['value'][] = StringUtil::binToUuid($placeholder);
         }
 
