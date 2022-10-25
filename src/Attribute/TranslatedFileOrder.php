@@ -159,11 +159,11 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             $builder->update($this->getValueTable(), 't');
             foreach ($setValues as $setValueKey => $setValue) {
                 $builder->set('t.' . $setValueKey, ':' . $setValueKey);
-                $builder->setParameter(':' . $setValueKey, $setValue);
+                $builder->setParameter($setValueKey, $setValue);
             }
 
             $this->addWhere($builder, $existingId, $langCode);
-            $builder->execute();
+            $builder->executeQuery();
         }
     }
 
@@ -195,7 +195,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         $builder
             ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
-            ->setParameter(':attributeID', $this->get('id'));
+            ->setParameter('attributeID', $this->get('id'));
 
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
