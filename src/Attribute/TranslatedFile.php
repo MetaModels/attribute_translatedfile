@@ -226,17 +226,17 @@ class TranslatedFile extends TranslatedReference
     private function addWhere(QueryBuilder $builder, $mixIds, $table, $mixLangCode = ''): void
     {
         $builder
-            ->andWhere($builder->expr()->eq( $table . '.att_id', ':attributeID'))
+            ->andWhere($builder->expr()->eq($table . '.att_id', ':attributeID'))
             ->setParameter(':attributeID', $this->get('id'));
 
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
                 $builder
-                    ->andWhere($builder->expr()->in( $table . '.item_id', ':itemIDs'))
+                    ->andWhere($builder->expr()->in($table . '.item_id', ':itemIDs'))
                     ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq( $table . '.item_id', ':itemID'))
+                    ->andWhere($builder->expr()->eq($table . '.item_id', ':itemID'))
                     ->setParameter('itemID', $mixIds);
             }
         }
@@ -244,11 +244,11 @@ class TranslatedFile extends TranslatedReference
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
                 $builder
-                    ->andWhere($builder->expr()->in( $table . '.langcode', ':langcodes'))
+                    ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
                     ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq( $table . '.langcode', ':langcode'))
+                    ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
                     ->setParameter('langcode', $mixLangCode);
             }
         }
@@ -258,6 +258,9 @@ class TranslatedFile extends TranslatedReference
      * {@inheritdoc}
      *
      * @throws \InvalidArgumentException If no binary in value throw invalid exception.
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     protected function prepareTemplate(Template $template, $rowData, $settings)
     {
@@ -266,7 +269,7 @@ class TranslatedFile extends TranslatedReference
         $value = $rowData[$this->getColName()]['value'];
 
         // No data and show image, check placeholder.
-        if (!$value['bin'] ?? null) {
+        if (!($value['bin'] ?? null)) {
             if (null === $settings->get('file_showImage')
                 || null === ($placeholder = $settings->get('file_placeholder'))) {
                 $template->files = [];
@@ -275,7 +278,7 @@ class TranslatedFile extends TranslatedReference
                 return;
             }
 
-            $value['bin'][] = $placeholder;
+            $value['bin'][]   = $placeholder;
             $value['value'][] = StringUtil::binToUuid($placeholder);
         }
 
