@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2017 The MetaModels team.
+ * (c) 2012-2022 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,7 +16,8 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedFile
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2017 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -25,12 +26,9 @@ namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
-use MetaModels\AttributeFileBundle\Doctrine\DBAL\Platforms\Keywords\NotSupportedKeywordList;
 use MetaModels\Helper\ToolboxFile;
 
 /**
@@ -38,13 +36,6 @@ use MetaModels\Helper\ToolboxFile;
  */
 class TranslatedFileOrder extends TranslatedReference implements IInternal
 {
-    /**
-     * The platform reserved keyword list.
-     *
-     * @var KeywordList
-     */
-    private $platformReservedWord;
-
     /**
      * {@inheritdoc}
      */
@@ -92,9 +83,9 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         $sortingValue = ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue);
         return [
-            $this->quoteReservedWord('tstamp')        => \time(),
-            $this->quoteReservedWord('value_sorting') => $sortingValue,
-            $this->quoteReservedWord('att_id')        => \substr($this->get('id'), 0, -\strlen('__sort'))
+            'tstamp'        => \time(),
+            'value_sorting' => $sortingValue,
+            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort'))
         ];
     }
 
@@ -165,9 +156,9 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             }
 
             $builder = $this->connection->createQueryBuilder();
-            $builder->update($this->quoteReservedWord($this->getValueTable()));
+            $builder->update($this->getValueTable(), 't');
             foreach ($setValues as $setValueKey => $setValue) {
-                $builder->set($this->quoteReservedWord($setValueKey), ':' . $setValueKey);
+                $builder->set('t.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter(':' . $setValueKey, $setValue);
             }
 
@@ -203,17 +194,17 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
     {
         $builder
-            ->andWhere($builder->expr()->eq('att_id', ':attributeID'))
+            ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
             ->setParameter(':attributeID', $this->get('id'));
 
         if (!empty($mixLangCode)) {
             if (\is_array($mixLangCode)) {
                 $builder
-                    ->andWhere($builder->expr()->in('langcode', ':langcodes'))
+                    ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
                     ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq('langcode', ':langcode'))
+                    ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
                     ->setParameter('langcode', $mixLangCode);
             }
         }
@@ -221,38 +212,13 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         if (!empty($mixIds)) {
             if (\is_array($mixIds)) {
                 $builder
-                    ->andWhere($builder->expr()->in('item_id', ':itemIDs'))
+                    ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))
                     ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
             } else {
                 $builder
-                    ->andWhere($builder->expr()->eq('item_id', ':itemID'))
+                    ->andWhere($builder->expr()->eq('t.item_id', ':itemID'))
                     ->setParameter('itemID', $mixIds);
             }
         }
-    }
-
-    /**
-     * Quote the reserved platform key word.
-     *
-     * @param string $word The key word.
-     *
-     * @return string
-     */
-    private function quoteReservedWord(string $word): string
-    {
-        if (null === $this->platformReservedWord) {
-            try {
-                $this->platformReservedWord = $this->connection->getDatabasePlatform()->getReservedKeywordsList();
-            } catch (DBALException $exception) {
-                // Add the not support key word list, if the platform has not a list of keywords.
-                $this->platformReservedWord = new NotSupportedKeywordList();
-            }
-        }
-
-        if (false === $this->platformReservedWord->isKeyword($word)) {
-            return $word;
-        }
-
-        return $this->connection->quoteIdentifier($word);
     }
 }

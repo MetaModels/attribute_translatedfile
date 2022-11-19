@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,7 +12,7 @@
  *
  * @package    MetaModels/attribute_translatedfile
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -185,8 +185,8 @@ class AddAttributeInformationTest extends TestCase
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
         $event     = new CollectMetaModelAttributeInformationEvent($metaModel);
         $event->setAttributeInformation($information);
-        $dispatcher->dispatch($event::NAME, $event);
+        $dispatcher->dispatch($event, $event::NAME);
 
-        $this->assertSame($expected, $event->getAttributeInformation());
+        self::assertSame($expected, $event->getAttributeInformation());
     }
 }
