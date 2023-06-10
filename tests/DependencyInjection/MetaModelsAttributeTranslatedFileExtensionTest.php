@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2021 The MetaModels team.
+ * (c) 2012-2023 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2012-2021 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2023 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -27,6 +28,7 @@ use MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttri
 use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildAttributeListener;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attribute\RemoveTypeOptions;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\DcaSetting\FileWidgetModeOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\FilterSetting\RemoveAttIdOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
@@ -65,7 +67,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
 
         $container
-            ->expects(self::exactly(8))
+            ->expects(self::exactly(9))
             ->method('setDefinition')
             ->withConsecutive(
                 [
@@ -166,6 +168,19 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
                             /** @var Definition $value */
                             $this->assertInstanceOf(Definition::class, $value);
                             $this->assertEquals(RemoveAttIdOptions::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
+
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    FileWidgetModeOptions::class,
+                    self::callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(null, $value->getClass());
                             $this->assertCount(1, $value->getTag('kernel.event_listener'));
 
                             return true;
