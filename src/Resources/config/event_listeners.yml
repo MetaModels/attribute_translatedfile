@@ -36,3 +36,13 @@ services:
                 event: dc-general.view.contao2backend.get-property-options
                 method: removeOption
                 priority: -1
+
+    MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\DcaSetting\FileWidgetModeOptions:
+      public: false
+      arguments:
+        $scopeDeterminator: '@cca.dc-general.scope-matcher'
+        $factory: '@MetaModels\IFactory'
+        $connection: '@database_connection'
+      tags:
+        - name: kernel.event_listener
+          event: dc-general.view.contao2backend.get-property-options
