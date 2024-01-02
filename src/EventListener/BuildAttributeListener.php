@@ -42,7 +42,8 @@ class BuildAttributeListener
     {
         $attribute = $event->getAttribute();
 
-        if (!($attribute instanceof TranslatedFile)
+        if (
+            !($attribute instanceof TranslatedFile)
             || !$attribute->get('file_multiple')
         ) {
             return;

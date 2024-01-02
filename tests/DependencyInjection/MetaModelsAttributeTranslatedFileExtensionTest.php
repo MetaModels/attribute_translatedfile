@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2023 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2023 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -34,22 +34,19 @@ use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeI
 use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 /**
  * This test case test the extension.
  *
  * @covers \MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttributeTranslatedFileExtension
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.LongClassName)
  */
 class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
 {
-    /**
-     * Test that extension can be instantiated.
-     *
-     * @return void
-     */
-    public function testInstantiation()
+    public function testInstantiation(): void
     {
         $extension = new MetaModelsAttributeTranslatedFileExtension();
 
@@ -57,139 +54,47 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         self::assertInstanceOf(ExtensionInterface::class, $extension);
     }
 
-    /**
-     * Test that the services are loaded.
-     *
-     * @return void
-     */
-    public function testFactoryIsRegistered()
+    public function testFactoryIsRegistered(): void
     {
-        $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
-
-        $container
-            ->expects(self::exactly(9))
-            ->method('setDefinition')
-            ->withConsecutive(
-                [
-                    'metamodels.attribute_translatedfile.factory',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(AttributeTypeFactory::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile_order.factory',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(AttributeOrderTypeFactory::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(AddAttributeInformation::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener.build_data_definition',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(BuildDataDefinitionListener::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener.build_attribute',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(BuildAttributeListener::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener.image_size_options',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(ImageSizeOptions::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener.remove_type_options',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(RemoveTypeOptions::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    'metamodels.attribute_translatedfile.event_listener.remove_att_id_options',
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(RemoveAttIdOptions::class, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ],
-                [
-                    FileWidgetModeOptions::class,
-                    self::callback(
-                        function ($value) {
-                            /** @var Definition $value */
-                            $this->assertInstanceOf(Definition::class, $value);
-                            $this->assertEquals(null, $value->getClass());
-                            $this->assertCount(1, $value->getTag('kernel.event_listener'));
-
-                            return true;
-                        }
-                    )
-                ]
-            );
+        $container = new ContainerBuilder();
 
         $extension = new MetaModelsAttributeTranslatedFileExtension();
         $extension->load([], $container);
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.factory'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.factory');
+        self::assertCount(1, $definition->getTag('metamodels.attribute_factory'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile_order.factory'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile_order.factory');
+        self::assertCount(1, $definition->getTag('metamodels.attribute_factory'));
+        // phpcs:disable
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener_factory.add_attribute_information');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.build_data_definition'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.build_data_definition');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.build_attribute'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.build_attribute');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.image_size_options'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.image_size_options');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.remove_type_options'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.remove_type_options');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+
+        self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.remove_att_id_options'));
+        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.remove_att_id_options');
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
+        // phpcs:enable
+        self::assertTrue($container->hasDefinition(FileWidgetModeOptions::class));
+        $definition = $container->getDefinition(FileWidgetModeOptions::class);
+        self::assertCount(1, $definition->getTag('kernel.event_listener'));
     }
 }

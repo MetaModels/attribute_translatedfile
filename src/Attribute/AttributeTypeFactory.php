@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -40,41 +41,41 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      *
      * @var Connection
      */
-    private $connection;
+    private Connection $connection;
     /**
      * The toolbox for file.
      *
      * @var ToolboxFile
      */
-    private $toolboxFile;
+    private ToolboxFile $toolboxFile;
 
     /**
      * The string util.
      *
      * @var Adapter|StringUtil
      */
-    private $stringUtil;
+    private Adapter|StringUtil $stringUtil;
 
     /**
      * The validator.
      *
      * @var Adapter|Validator
      */
-    private $validator;
+    private Adapter|Validator $validator;
 
     /**
      * The repository for files.
      *
      * @var Adapter|FilesModel
      */
-    private $fileRepository;
+    private Adapter|FilesModel $fileRepository;
 
     /**
      * The contao configurations.
      *
      * @var Adapter|Config
      */
-    private $config;
+    private Adapter|Config $config;
 
     /**
      * Create a new instance.
@@ -89,10 +90,10 @@ class AttributeTypeFactory implements IAttributeTypeFactory
     public function __construct(
         Connection $connection,
         ToolboxFile $toolboxFile,
-        Adapter $stringUtil,
-        Adapter $validator,
-        Adapter $fileRepository,
-        Adapter $config
+        Adapter|StringUtil $stringUtil,
+        Adapter|Validator $validator,
+        Adapter|FilesModel $fileRepository,
+        Adapter|Config $config
     ) {
         $this->connection     = $connection;
         $this->toolboxFile    = $toolboxFile;

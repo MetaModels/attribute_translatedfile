@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2022 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,7 +22,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Oliver Willmes <info@oliverwillmes.de>
- * @copyright  2012-2022 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -35,6 +35,7 @@ use Contao\FilesModel;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Validator;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\TranslatedReference;
@@ -44,43 +45,46 @@ use MetaModels\Render\Template;
 
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class TranslatedFile extends TranslatedReference
 {
     /**
      * The toolbox for file.
      *
-     * @var ToolboxFile|null
+     * @var ToolboxFile
      */
-    private $toolboxFile;
+    private ToolboxFile $toolboxFile;
 
     /**
      * The string util.
      *
-     * @var Adapter|StringUtil|null
+     * @var Adapter|StringUtil
      */
-    private $stringUtil;
+    private Adapter|StringUtil $stringUtil;
 
     /**
      * The validator.
      *
-     * @var Adapter|Validator|null
+     * @var Adapter|Validator
      */
-    private $validator;
+    private Adapter|Validator $validator;
 
     /**
      * The repository for files.
      *
-     * @var Adapter|FilesModel|null
+     * @var Adapter|FilesModel
      */
-    private $fileRepository;
+    private Adapter|FilesModel $fileRepository;
 
     /**
      * The contao configurations.
      *
-     * @var Adapter|Config|null
+     * @var Adapter|Config
      */
-    private $config;
+    private Adapter|Config $config;
 
     /**
      * {@inheritDoc}
@@ -93,13 +97,13 @@ class TranslatedFile extends TranslatedReference
      */
     public function __construct(
         IMetaModel $objMetaModel,
-        $arrData = [],
+        array $arrData = [],
         Connection $connection = null,
         ToolboxFile $toolboxFile = null,
-        Adapter $stringUtil = null,
-        Adapter $validator = null,
-        Adapter $fileRepository = null,
-        Adapter $config = null
+        Adapter|StringUtil $stringUtil = null,
+        Adapter|Validator $validator = null,
+        Adapter|FilesModel $fileRepository = null,
+        Adapter|Config $config = null
     ) {
         parent::__construct($objMetaModel, $arrData, $connection);
 
@@ -111,7 +115,9 @@ class TranslatedFile extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
             $toolboxFile = System::getContainer()->get('metamodels.attribute_file.toolbox.file');
+            assert($toolboxFile instanceof ToolboxFile);
         }
+        $this->toolboxFile = $toolboxFile;
 
         if (null === $stringUtil) {
             // @codingStandardsIgnoreStart
@@ -121,8 +127,10 @@ class TranslatedFile extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
 
-            $stringUtil = System::getContainer()->get('contao.framework')->getAdapter(StringUtil::class);
+            $stringUtil = System::getContainer()->get('contao.framework')?->getAdapter(StringUtil::class);
+            assert($stringUtil instanceof StringUtil);
         }
+        $this->stringUtil = $stringUtil;
 
         if (null === $validator) {
             // @codingStandardsIgnoreStart
@@ -132,8 +140,10 @@ class TranslatedFile extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
 
-            $validator = System::getContainer()->get('contao.framework')->getAdapter(Validator::class);
+            $validator = System::getContainer()->get('contao.framework')?->getAdapter(Validator::class);
+            assert($validator instanceof Validator);
         }
+        $this->validator = $validator;
 
         if (null === $fileRepository) {
             // @codingStandardsIgnoreStart
@@ -143,8 +153,10 @@ class TranslatedFile extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
 
-            $fileRepository = System::getContainer()->get('contao.framework')->getAdapter(FilesModel::class);
+            $fileRepository = System::getContainer()->get('contao.framework')?->getAdapter(FilesModel::class);
+            assert($fileRepository instanceof FilesModel);
         }
+        $this->fileRepository = $fileRepository;
 
         if (null === $config) {
             // @codingStandardsIgnoreStart
@@ -154,14 +166,10 @@ class TranslatedFile extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
 
-            $config = System::getContainer()->get('contao.framework')->getAdapter(Config::class);
+            $config = System::getContainer()->get('contao.framework')?->getAdapter(Config::class);
+            assert($config instanceof Config);
         }
-
-        $this->toolboxFile    = $toolboxFile;
-        $this->stringUtil     = $stringUtil;
-        $this->validator      = $validator;
-        $this->fileRepository = $fileRepository;
-        $this->config         = $config;
+        $this->config = $config;
     }
 
     /**
@@ -218,13 +226,18 @@ class TranslatedFile extends TranslatedReference
      * Add a where clause for the given id(s) and language code to the query builder.
      *
      * @param QueryBuilder         $builder     The query builder.
-     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     * @param string|string[]|null $mixIds      One, none or many ids to use.
+     * @param string               $table       The table.
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
      * @return void
      */
-    private function addWhere(QueryBuilder $builder, $mixIds, $table, $mixLangCode = ''): void
-    {
+    private function addWhere(
+        QueryBuilder $builder,
+        array|string|null $mixIds,
+        string $table,
+        array|string $mixLangCode = ''
+    ): void {
         $builder
             ->andWhere($builder->expr()->eq($table . '.att_id', ':attributeID'))
             ->setParameter('attributeID', $this->get('id'));
@@ -233,7 +246,7 @@ class TranslatedFile extends TranslatedReference
             if (\is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in($table . '.item_id', ':itemIDs'))
-                    ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
+                    ->setParameter('itemIDs', \array_map('intval', $mixIds), ArrayParameterType::INTEGER);
             } else {
                 $builder
                     ->andWhere($builder->expr()->eq($table . '.item_id', ':itemID'))
@@ -245,7 +258,7 @@ class TranslatedFile extends TranslatedReference
             if (\is_array($mixLangCode)) {
                 $builder
                     ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
-                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
+                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
             } else {
                 $builder
                     ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
@@ -262,18 +275,20 @@ class TranslatedFile extends TranslatedReference
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function prepareTemplate(Template $template, $rowData, $settings)
+    protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
     {
-        parent::prepareTemplate($template, $rowData, $settings);
+        parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
-        $value = $rowData[$this->getColName()]['value'] ?? null;
+        $value = $arrRowData[$this->getColName()]['value'] ?? null;
 
         // No data and show image, check placeholder.
         if (!($value['bin'] ?? null)) {
-            if (null === $settings->get('file_showImage')
-                || null === ($placeholder = $settings->get('file_placeholder'))) {
-                $template->files = [];
-                $template->src   = [];
+            if (
+                null === $objSettings->get('file_showImage')
+                || null === ($placeholder = $objSettings->get('file_placeholder'))
+            ) {
+                $objTemplate->files = [];
+                $objTemplate->src   = [];
 
                 return;
             }
@@ -283,6 +298,7 @@ class TranslatedFile extends TranslatedReference
         }
 
         $toolbox = clone $this->toolboxFile;
+        /** @psalm-suppress DeprecatedMethod */
         $toolbox
             ->setBaseLanguage($this->getMetaModel()->getActiveLanguage())
             ->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage())
@@ -290,18 +306,18 @@ class TranslatedFile extends TranslatedReference
                 \sprintf(
                     '%s.%s.%s',
                     $this->getMetaModel()->getTableName(),
-                    $settings->get('id'),
-                    $rowData['id']
+                    $objSettings->get('id'),
+                    $arrRowData['id']
                 )
             )
-            ->setShowImages($settings->get('file_showImage'));
+            ->setShowImages($objSettings->get('file_showImage'));
 
         if (($types = \trim($this->get('file_validFileTypes')))) {
             $toolbox->setAcceptedExtensions($types);
         }
 
-        if ($settings->get('file_imageSize')) {
-            $toolbox->setResizeImages($settings->get('file_imageSize'));
+        if ($objSettings->get('file_imageSize')) {
+            $toolbox->setResizeImages($objSettings->get('file_imageSize'));
         }
 
         if (isset($value['value'])) {
@@ -317,20 +333,20 @@ class TranslatedFile extends TranslatedReference
         }
 
         $data = [];
-        $toolbox->withDownloadKeys($settings->get('file_showLink') && $settings->get('file_protectedDownload'));
+        $toolbox->withDownloadKeys($objSettings->get('file_showLink') && $objSettings->get('file_protectedDownload'));
         $toolbox->resolveFiles();
-        if ('manual' !== $settings->get('file_sortBy')) {
-            $data = $toolbox->sortFiles($settings->get('file_sortBy'));
+        if ('manual' !== $objSettings->get('file_sortBy')) {
+            $data = $toolbox->sortFiles($objSettings->get('file_sortBy'));
         }
-        if ('manual' === $settings->get('file_sortBy')) {
+        if ('manual' === $objSettings->get('file_sortBy')) {
             $data = $toolbox->sortFiles(
-                $settings->get('file_sortBy'),
-                ($rowData[$this->getColName()]['value_sorting']['bin'] ?? [])
+                $objSettings->get('file_sortBy'),
+                ($arrRowData[$this->getColName()]['value_sorting']['bin'] ?? [])
             );
         }
 
-        $template->files = $data['files'];
-        $template->src   = $data['source'];
+        $objTemplate->files = $data['files'];
+        $objTemplate->src   = $data['source'];
     }
 
     /**
@@ -365,7 +381,8 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $file = null;
 
-            if ($this->validator->isStringUuid($this->get('file_uploadFolder'))
+            if (
+                $this->validator->isStringUuid($this->get('file_uploadFolder'))
                 || $this->validator->isBinaryUuid($this->get('file_uploadFolder'))
             ) {
                 $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder'));
@@ -412,7 +429,8 @@ class TranslatedFile extends TranslatedReference
 
         $widgetMode = $this->getOverrideValue('file_widgetMode', $arrOverrides);
 
-        if (('normal' !== $widgetMode)
+        if (
+            ('normal' !== $widgetMode)
             && ((bool) $this->get('file_multiple'))
         ) {
             $fieldDefinition['eval']['orderField'] = $this->getColName() . '__sort';

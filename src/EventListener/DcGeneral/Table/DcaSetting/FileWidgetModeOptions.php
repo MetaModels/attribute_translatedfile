@@ -41,7 +41,8 @@ class FileWidgetModeOptions extends AbstractListener
      */
     public function __invoke(GetPropertyOptionsEvent $event): void
     {
-        if (('file_widgetMode' !== $event->getPropertyName())
+        if (
+            ('file_widgetMode' !== $event->getPropertyName())
             || (false === $this->wantToHandle($event))
             || (false === $this->isAttributeTranslatedFile($event))
         ) {

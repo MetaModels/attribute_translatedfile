@@ -49,7 +49,8 @@ class BuildDataDefinitionListener
                 // ... in any legend ...
                 foreach ($palette->getLegends() as $legend) {
                     // ... of the searched name ...
-                    if (($legend->hasProperty($propertyName))
+                    if (
+                        ($legend->hasProperty($propertyName))
                         && ($container->getPropertiesDefinition()->hasProperty($propertyName . '__sort'))
                     ) {
                         // ... must have the order field as companion, visible only when the real property is.
