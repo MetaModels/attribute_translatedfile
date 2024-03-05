@@ -22,6 +22,7 @@ namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Palette\Property;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\BuildDataDefinitionEvent;
+use MetaModels\AttributeTranslatedFileBundle\DcGeneral\AttributeTranslatedFileDefinition;
 
 /**
  * The build data definition listener.
@@ -43,7 +44,9 @@ class BuildDataDefinitionListener
             return;
         }
         // All properties...
-        foreach ($container->getDefinition('metamodels.translatedfile-attributes')->get() as $propertyName) {
+        $definition = $container->getDefinition('metamodels.translatedfile-attributes');
+        assert($definition instanceof AttributeTranslatedFileDefinition);
+        foreach ($definition->get() as $propertyName) {
             // ... in all palettes ...
             foreach ($container->getPalettesDefinition()->getPalettes() as $palette) {
                 // ... in any legend ...

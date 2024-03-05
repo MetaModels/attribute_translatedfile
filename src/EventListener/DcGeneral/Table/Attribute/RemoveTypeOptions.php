@@ -46,7 +46,7 @@ class RemoveTypeOptions
             return;
         }
 
-        $options = $event->getOptions();
+        $options = $event->getOptions() ?? [];
         if (!\array_key_exists('translatedfilesort', $options)) {
             return;
         }

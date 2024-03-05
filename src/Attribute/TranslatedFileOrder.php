@@ -28,6 +28,7 @@ use Contao\StringUtil;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
@@ -99,7 +100,10 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         $mainColumnName = \substr($this->getColName(), 0, -\strlen('__sort'));
         if (\in_array($strKey, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
-            return $metaModel->getAttribute($mainColumnName)->get($strKey);
+            $attribute = $metaModel->getAttribute($mainColumnName);
+            assert($attribute instanceof IAttribute);
+
+            return $attribute->get($strKey);
         }
 
         return null;
@@ -112,7 +116,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      *
      * @return string An serialized array with binary data or a binary data.
      */
-    private function convert(mixed $values): ?string
+    private function convert(mixed $values): string
     {
         $data = ToolboxFile::convertValuesToDatabase($values);
 
@@ -121,7 +125,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             return \serialize($data);
         }
 
-        return ($data[0] ?? null);
+        return ($data[0] ?? '');
     }
 
     /**
@@ -150,7 +154,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         foreach ($existingIds as $existingId) {
             if (
                 !isset($arrValues[$existingId]['value_sorting']['bin'][0])
-                || !\count(($setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode)))
+                || !\count(($setValues = $this->getSetValues($arrValues[$existingId], (int) $existingId, $strLangCode)))
             ) {
                 continue;
             }
@@ -197,19 +201,18 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
             ->setParameter('attributeID', $this->get('id'));
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $builder
-                    ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
-                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
-            } else {
-                $builder
-                    ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
-                    ->setParameter('langcode', $mixLangCode);
-            }
+
+        if (\is_array($mixLangCode)) {
+            $builder
+                ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
+                ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
+        } else {
+            $builder
+                ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
+                ->setParameter('langcode', $mixLangCode);
         }
 
-        if (!empty($mixIds)) {
+        if (null !== $mixIds) {
             if (\is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))

@@ -46,7 +46,7 @@ class RemoveAttIdOptions
             return;
         }
 
-        $options = $event->getOptions();
+        $options = $event->getOptions() ?? [];
         foreach ($options as $key => $name) {
             $sortKey = $key . '__sort';
             if (

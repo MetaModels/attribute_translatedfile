@@ -38,6 +38,8 @@ use Contao\Validator;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use MetaModels\Attribute\IAttribute;
+use MetaModels\Attribute\ITranslated;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
@@ -196,7 +198,7 @@ class TranslatedFile extends TranslatedReference
         $procedure  = 't.att_id=?';
         $parameters = [$this->get('id')];
 
-        if (!empty($mixIds)) {
+        if (null !== $mixIds) {
             if (\is_array($mixIds)) {
                 $procedure .= ' AND t.item_id IN (' . $this->parameterMask($mixIds) . ')';
                 $parameters = \array_merge($parameters, $mixIds);
@@ -206,14 +208,12 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $procedure .= ' AND t.langcode IN (' . $this->parameterMask($mixLangCode) . ')';
-                $parameters = \array_merge($parameters, $mixLangCode);
-            } else {
-                $procedure   .= ' AND t.langcode=?';
-                $parameters[] = $mixLangCode;
-            }
+        if (\is_array($mixLangCode)) {
+            $procedure .= ' AND t.langcode IN (' . $this->parameterMask($mixLangCode) . ')';
+            $parameters = \array_merge($parameters, $mixLangCode);
+        } else {
+            $procedure   .= ' AND t.langcode=?';
+            $parameters[] = $mixLangCode;
         }
 
         return [
@@ -242,7 +242,7 @@ class TranslatedFile extends TranslatedReference
             ->andWhere($builder->expr()->eq($table . '.att_id', ':attributeID'))
             ->setParameter('attributeID', $this->get('id'));
 
-        if (!empty($mixIds)) {
+        if (null !== $mixIds) {
             if (\is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in($table . '.item_id', ':itemIDs'))
@@ -254,16 +254,14 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $builder
-                    ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
-                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
-            } else {
-                $builder
-                    ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
-                    ->setParameter('langcode', $mixLangCode);
-            }
+        if (\is_array($mixLangCode)) {
+            $builder
+                ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
+                ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
+        } else {
+            $builder
+                ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
+                ->setParameter('langcode', $mixLangCode);
         }
     }
 
@@ -279,14 +277,25 @@ class TranslatedFile extends TranslatedReference
     {
         parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
+        /** @var array{
+         *    bin: list<string>,
+         *    value: list<string>,
+         *    path: list<string>,
+         *    meta: list<string>,
+         *    bin_sorted?: list<string>,
+         *    value_sorted?: list<string>,
+         *    path_sorted?: list<string>,
+         *    meta_sorted?: list<string>
+         *  }|null $value */
         $value = $arrRowData[$this->getColName()]['value'] ?? null;
 
+        if (null === $value) {
+            $value = ['bin' => [], 'value' => [], 'path' => [], 'meta' => []];
+        }
+
         // No data and show image, check placeholder.
-        if (!($value['bin'] ?? null)) {
-            if (
-                null === $objSettings->get('file_showImage')
-                || null === ($placeholder = $objSettings->get('file_placeholder'))
-            ) {
+        if ([] === $value['bin']) {
+            if (null === ($placeholder = $objSettings->get('file_placeholder'))) {
                 $objTemplate->files = [];
                 $objTemplate->src   = [];
 
@@ -298,6 +307,7 @@ class TranslatedFile extends TranslatedReference
         }
 
         $toolbox = clone $this->toolboxFile;
+
         /** @psalm-suppress DeprecatedMethod */
         $toolbox
             ->setBaseLanguage($this->getMetaModel()->getActiveLanguage())
@@ -306,7 +316,7 @@ class TranslatedFile extends TranslatedReference
                 \sprintf(
                     '%s.%s.%s',
                     $this->getMetaModel()->getTableName(),
-                    $objSettings->get('id'),
+                    $objSettings->get('id') ?? '',
                     $arrRowData['id']
                 )
             )
@@ -316,8 +326,8 @@ class TranslatedFile extends TranslatedReference
             $toolbox->setAcceptedExtensions($types);
         }
 
-        if ($objSettings->get('file_imageSize')) {
-            $toolbox->setResizeImages($objSettings->get('file_imageSize'));
+        if (null !== ($imageSize = $objSettings->get('file_imageSize'))) {
+            $toolbox->setResizeImages($imageSize);
         }
 
         if (isset($value['value'])) {
@@ -333,14 +343,16 @@ class TranslatedFile extends TranslatedReference
         }
 
         $data = [];
-        $toolbox->withDownloadKeys($objSettings->get('file_showLink') && $objSettings->get('file_protectedDownload'));
+        $toolbox->withDownloadKeys(
+            ($objSettings->get('file_showLink') ?? false) && ($objSettings->get('file_protectedDownload') ?? false)
+        );
         $toolbox->resolveFiles();
         if ('manual' !== $objSettings->get('file_sortBy')) {
-            $data = $toolbox->sortFiles($objSettings->get('file_sortBy'));
+            $data = $toolbox->sortFiles(($objSettings->get('file_sortBy') ?? ''));
         }
         if ('manual' === $objSettings->get('file_sortBy')) {
             $data = $toolbox->sortFiles(
-                $objSettings->get('file_sortBy'),
+                ($objSettings->get('file_sortBy') ?? ''),
                 ($arrRowData[$this->getColName()]['value_sorting']['bin'] ?? [])
             );
         }
@@ -382,10 +394,10 @@ class TranslatedFile extends TranslatedReference
             $file = null;
 
             if (
-                $this->validator->isStringUuid($this->get('file_uploadFolder'))
-                || $this->validator->isBinaryUuid($this->get('file_uploadFolder'))
+                $this->validator::isStringUuid($this->get('file_uploadFolder'))
+                || $this->validator::isBinaryUuid($this->get('file_uploadFolder'))
             ) {
-                $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder'));
+                $file = $this->fileRepository::findByUuid($this->get('file_uploadFolder'));
             }
 
             // Check if we have a file.
@@ -397,7 +409,7 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if ($this->get('file_validFileTypes')) {
+        if (null !== $this->get('file_validFileTypes')) {
             $fieldDefinition['eval']['extensions'] = $this->get('file_validFileTypes');
         }
 
@@ -483,9 +495,9 @@ class TranslatedFile extends TranslatedReference
      *
      * @param mixed $mixValues The data to serialize.
      *
-     * @return string An serialized array with binary data or a binary data.
+     * @return string|null An serialized array with binary data or a binary data.
      */
-    private function convert($mixValues)
+    private function convert(mixed $mixValues): ?string
     {
         $data = ToolboxFile::convertValuesToDatabase($mixValues);
 
@@ -523,7 +535,7 @@ class TranslatedFile extends TranslatedReference
         $builder = $this->connection->createQueryBuilder();
         foreach ($existingIds as $existingId) {
             if ($arrValues[$existingId]['value']['bin'][0]) {
-                $setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode);
+                $setValues = $this->getSetValues($arrValues[$existingId], (int) $existingId, $strLangCode);
                 $builder->update($this->getValueTable());
                 foreach ($setValues as $setValueKey => $setValue) {
                     $builder->set($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
@@ -546,7 +558,7 @@ class TranslatedFile extends TranslatedReference
                 continue;
             }
 
-            foreach ($this->getSetValues($arrValues[$newId], $newId, $strLangCode) as $setValueKey => $setValue) {
+            foreach ($this->getSetValues($arrValues[$newId], (int) $newId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->setValue($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
                 $setValues[$this->getValueTable() . '.' . $setValueKey] = $setValue;
@@ -571,6 +583,7 @@ class TranslatedFile extends TranslatedReference
 
         if ($metaModel->hasAttribute($this->getColName() . '__sort')) {
             $orderAttribute = $metaModel->getAttribute($this->getColName() . '__sort');
+            assert($orderAttribute instanceof ITranslated);
 
             $sortedValues = $orderAttribute->getTranslatedDataFor($arrIds, $strLangCode);
             foreach ($values as $valueId => $value) {

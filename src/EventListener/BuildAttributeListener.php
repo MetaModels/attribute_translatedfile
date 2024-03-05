@@ -81,6 +81,9 @@ class BuildAttributeListener
             $container->setDefinition('metamodels.translatedfile-attributes', new AttributeTranslatedFileDefinition());
         }
 
-        $container->getDefinition('metamodels.translatedfile-attributes')->add($name);
+        $definition = $container->getDefinition('metamodels.translatedfile-attributes');
+        assert($definition instanceof AttributeTranslatedFileDefinition);
+
+        $definition->add($name);
     }
 }

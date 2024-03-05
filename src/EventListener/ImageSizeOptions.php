@@ -23,6 +23,7 @@
 namespace MetaModels\AttributeTranslatedFileBundle\EventListener;
 
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
+use ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\DefaultDataProvider;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\ContainerInterface;
 
@@ -42,6 +43,7 @@ class ImageSizeOptions
     {
         $dataDefinition = $event->getEnvironment()->getDataDefinition();
         assert($dataDefinition instanceof ContainerInterface);
+
         if (
             ('file_imageSize' !== $event->getPropertyName())
             || ('tl_metamodel_rendersetting' !== $dataDefinition->getName())
@@ -53,10 +55,11 @@ class ImageSizeOptions
             return;
         }
 
-        $options                = $event->getOptions();
-        $options['image_sizes'] = \array_replace($sizes, (array) $options['image_sizes']);
-
-        $event->setOptions($options);
+        $options = $event->getOptions();
+        if (\is_array($options) && \array_key_exists('image_sizes', $options)) {
+            $options['image_sizes'] = \array_replace($sizes, $options['image_sizes']);
+            $event->setOptions($options);
+        }
     }
 
     /**
@@ -64,23 +67,24 @@ class ImageSizeOptions
      *
      * @return array
      */
-    private function getThemeImageSizes()
+    private function getThemeImageSizes(): array
     {
         $dataProvider = new DefaultDataProvider();
         $dataProvider->setBaseConfig(['source' => 'tl_image_size']);
 
         $config = $dataProvider->getEmptyConfig();
         $config->setFields(['id', 'name', 'width', 'height']);
-        $config->setSorting(['pid', 'name']);
+        $config->setSorting(['pid' => 'ASC', 'name' => 'ASC']);
 
         $collection = $dataProvider->fetchAll($config);
+        assert($collection instanceof CollectionInterface);
         if (!$collection->count()) {
             return [];
         }
 
         $sizes = [];
         foreach ($collection as $model) {
-            $sizes[$model->getProperty('id')] = sprintf(
+            $sizes[$model->getProperty('id')] = \sprintf(
                 '%s (%sx%s)',
                 $model->getProperty('name'),
                 $model->getProperty('width'),

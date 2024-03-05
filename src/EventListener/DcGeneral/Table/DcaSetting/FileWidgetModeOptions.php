@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2023 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,7 +12,7 @@
  *
  * @package    MetaModels/attribute_translatedfile
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2023 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -63,7 +63,7 @@ class FileWidgetModeOptions extends AbstractListener
     {
         $addOptions = ['downloads', 'gallery'];
 
-        $event->setOptions(\array_values(\array_unique(\array_merge($event->getOptions(), $addOptions))));
+        $event->setOptions(\array_values(\array_unique(\array_merge($event->getOptions() ?? [], $addOptions))));
     }
 
     /**
@@ -88,6 +88,7 @@ class FileWidgetModeOptions extends AbstractListener
         }
 
         $result = $statement->fetchAssociative();
-        return 'translatedfile' === $result['type'];
+
+        return 'translatedfile' === ($result['type'] ?? null);
     }
 }
