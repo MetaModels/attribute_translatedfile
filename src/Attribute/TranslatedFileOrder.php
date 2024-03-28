@@ -133,10 +133,6 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
-        if (empty($arrValue)) {
-            return [];
-        }
-
         return [
             'tstamp'        => \time(),
             'value_sorting' => $this->convert($arrValue['value_sorting'])
@@ -154,7 +150,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         foreach ($existingIds as $existingId) {
             if (
                 !isset($arrValues[$existingId]['value_sorting']['bin'][0])
-                || !\count(($setValues = $this->getSetValues($arrValues[$existingId], (int) $existingId, $strLangCode)))
+                || !\count(($setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode)))
             ) {
                 continue;
             }

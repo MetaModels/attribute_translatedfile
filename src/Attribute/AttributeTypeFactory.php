@@ -52,48 +52,48 @@ class AttributeTypeFactory implements IAttributeTypeFactory
     /**
      * The string util.
      *
-     * @var Adapter|StringUtil
+     * @var Adapter
      */
-    private Adapter|StringUtil $stringUtil;
+    private Adapter $stringUtil;
 
     /**
      * The validator.
      *
-     * @var Adapter|Validator
+     * @var Adapter
      */
-    private Adapter|Validator $validator;
+    private Adapter $validator;
 
     /**
      * The repository for files.
      *
-     * @var Adapter|FilesModel
+     * @var Adapter
      */
-    private Adapter|FilesModel $fileRepository;
+    private Adapter $fileRepository;
 
     /**
      * The contao configurations.
      *
-     * @var Adapter|Config
+     * @var Adapter
      */
-    private Adapter|Config $config;
+    private Adapter $config;
 
     /**
      * Create a new instance.
      *
-     * @param Connection         $connection     Database connection.
-     * @param ToolboxFile        $toolboxFile    The toolbox for file.
-     * @param Adapter|StringUtil $stringUtil     The string util.
-     * @param Adapter|Validator  $validator      The validator.
-     * @param Adapter|FilesModel $fileRepository The repository for files.
-     * @param Adapter|Config     $config         The contao configurations.
+     * @param Connection  $connection     Database connection.
+     * @param ToolboxFile $toolboxFile    The toolbox for file.
+     * @param Adapter     $stringUtil     The string util.
+     * @param Adapter     $validator      The validator.
+     * @param Adapter     $fileRepository The repository for files.
+     * @param Adapter     $config         The contao configurations.
      */
     public function __construct(
         Connection $connection,
         ToolboxFile $toolboxFile,
-        Adapter|StringUtil $stringUtil,
-        Adapter|Validator $validator,
-        Adapter|FilesModel $fileRepository,
-        Adapter|Config $config
+        Adapter $stringUtil,
+        Adapter $validator,
+        Adapter $fileRepository,
+        Adapter $config
     ) {
         $this->connection     = $connection;
         $this->toolboxFile    = $toolboxFile;

@@ -63,49 +63,49 @@ class TranslatedFile extends TranslatedReference
     /**
      * The string util.
      *
-     * @var Adapter|StringUtil
+     * @var Adapter<StringUtil>
      */
-    private Adapter|StringUtil $stringUtil;
+    private Adapter $stringUtil;
 
     /**
      * The validator.
      *
-     * @var Adapter|Validator
+     * @var Adapter<Validator>
      */
-    private Adapter|Validator $validator;
+    private Adapter $validator;
 
     /**
      * The repository for files.
      *
-     * @var Adapter|FilesModel
+     * @var Adapter<FilesModel>
      */
-    private Adapter|FilesModel $fileRepository;
+    private Adapter $fileRepository;
 
     /**
      * The contao configurations.
      *
-     * @var Adapter|Config
+     * @var Adapter<Config>
      */
-    private Adapter|Config $config;
+    private Adapter $config;
 
     /**
-     * {@inheritDoc}
+     * Create a new instance.
      *
-     * @param ToolboxFile|null        $toolboxFile    The toolbox for file.
-     * @param Adapter|StringUtil|null $stringUtil     The string util.
-     * @param Adapter|Validator|null  $validator      The validator.
-     * @param Adapter|FilesModel|null $fileRepository The repository for files.
-     * @param Adapter|Config|null     $config         The contao configurations.
+     * @param ToolboxFile|null $toolboxFile    The toolbox for file.
+     * @param Adapter|null     $stringUtil     The string util.
+     * @param Adapter|null     $validator      The validator.
+     * @param Adapter|null     $fileRepository The repository for files.
+     * @param Adapter|null     $config         The contao configurations.
      */
     public function __construct(
         IMetaModel $objMetaModel,
         array $arrData = [],
         Connection $connection = null,
         ToolboxFile $toolboxFile = null,
-        Adapter|StringUtil $stringUtil = null,
-        Adapter|Validator $validator = null,
-        Adapter|FilesModel $fileRepository = null,
-        Adapter|Config $config = null
+        Adapter $stringUtil = null,
+        Adapter $validator = null,
+        Adapter $fileRepository = null,
+        Adapter $config = null
     ) {
         parent::__construct($objMetaModel, $arrData, $connection);
 
@@ -130,7 +130,7 @@ class TranslatedFile extends TranslatedReference
             // @codingStandardsIgnoreEnd
 
             $stringUtil = System::getContainer()->get('contao.framework')?->getAdapter(StringUtil::class);
-            assert($stringUtil instanceof StringUtil);
+            assert($stringUtil instanceof Adapter);
         }
         $this->stringUtil = $stringUtil;
 
@@ -143,7 +143,7 @@ class TranslatedFile extends TranslatedReference
             // @codingStandardsIgnoreEnd
 
             $validator = System::getContainer()->get('contao.framework')?->getAdapter(Validator::class);
-            assert($validator instanceof Validator);
+            assert($validator instanceof Adapter);
         }
         $this->validator = $validator;
 
@@ -156,7 +156,7 @@ class TranslatedFile extends TranslatedReference
             // @codingStandardsIgnoreEnd
 
             $fileRepository = System::getContainer()->get('contao.framework')?->getAdapter(FilesModel::class);
-            assert($fileRepository instanceof FilesModel);
+            assert($fileRepository instanceof Adapter);
         }
         $this->fileRepository = $fileRepository;
 
@@ -169,7 +169,7 @@ class TranslatedFile extends TranslatedReference
             // @codingStandardsIgnoreEnd
 
             $config = System::getContainer()->get('contao.framework')?->getAdapter(Config::class);
-            assert($config instanceof Config);
+            assert($config instanceof Adapter);
         }
         $this->config = $config;
     }
@@ -316,30 +316,22 @@ class TranslatedFile extends TranslatedReference
                 \sprintf(
                     '%s.%s.%s',
                     $this->getMetaModel()->getTableName(),
-                    $objSettings->get('id') ?? '',
-                    $arrRowData['id']
+                    (string) ($objSettings->get('id') ?? ''),
+                    (string) ($arrRowData['id'] ?? '0')
                 )
             )
-            ->setShowImages($objSettings->get('file_showImage'));
+            ->setShowImages((bool) $objSettings->get('file_showImage'));
 
         if (($types = \trim($this->get('file_validFileTypes')))) {
             $toolbox->setAcceptedExtensions($types);
         }
 
-        if (null !== ($imageSize = $objSettings->get('file_imageSize'))) {
+        if (\is_array($imageSize = $objSettings->get('file_imageSize'))) {
             $toolbox->setResizeImages($imageSize);
         }
 
-        if (isset($value['value'])) {
-            foreach ($value['value'] as $strFile) {
-                $toolbox->addPathById($strFile);
-            }
-        } elseif (\is_array($value)) {
-            foreach ($value as $strFile) {
-                $toolbox->addPathById($strFile);
-            }
-        } else {
-            $toolbox->addPathById($value);
+        foreach ($value['value'] ?? [] as $strFile) {
+            $toolbox->addPathById($strFile);
         }
 
         $data = [];
@@ -347,6 +339,7 @@ class TranslatedFile extends TranslatedReference
             ($objSettings->get('file_showLink') ?? false) && ($objSettings->get('file_protectedDownload') ?? false)
         );
         $toolbox->resolveFiles();
+
         if ('manual' !== $objSettings->get('file_sortBy')) {
             $data = $toolbox->sortFiles(($objSettings->get('file_sortBy') ?? ''));
         }
@@ -393,11 +386,8 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $file = null;
 
-            if (
-                $this->validator::isStringUuid($this->get('file_uploadFolder'))
-                || $this->validator::isBinaryUuid($this->get('file_uploadFolder'))
-            ) {
-                $file = $this->fileRepository::findByUuid($this->get('file_uploadFolder'));
+            if ($this->validator->isUuid($this->get('file_uploadFolder') ?? '')) {
+                $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder') ?? '');
             }
 
             // Check if we have a file.
@@ -502,7 +492,7 @@ class TranslatedFile extends TranslatedReference
         $data = ToolboxFile::convertValuesToDatabase($mixValues);
 
         // Check single file or multiple file.
-        return $this->get('file_multiple')
+        return (bool) $this->get('file_multiple')
             ? \serialize($data)
             : ($data[0] ?? null);
     }
@@ -535,7 +525,7 @@ class TranslatedFile extends TranslatedReference
         $builder = $this->connection->createQueryBuilder();
         foreach ($existingIds as $existingId) {
             if ($arrValues[$existingId]['value']['bin'][0]) {
-                $setValues = $this->getSetValues($arrValues[$existingId], (int) $existingId, $strLangCode);
+                $setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode);
                 $builder->update($this->getValueTable());
                 foreach ($setValues as $setValueKey => $setValue) {
                     $builder->set($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
@@ -558,7 +548,7 @@ class TranslatedFile extends TranslatedReference
                 continue;
             }
 
-            foreach ($this->getSetValues($arrValues[$newId], (int) $newId, $strLangCode) as $setValueKey => $setValue) {
+            foreach ($this->getSetValues($arrValues[$newId], $newId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->setValue($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
                 $setValues[$this->getValueTable() . '.' . $setValueKey] = $setValue;
