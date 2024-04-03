@@ -26,12 +26,13 @@ namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\StringUtil;
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
+
+use function array_key_exists;
 
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
@@ -148,16 +149,14 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($arrValues), $strLangCode));
 
         foreach ($existingIds as $existingId) {
-            if (
-                !isset($arrValues[$existingId]['value_sorting']['bin'][0])
-                || !\count(($setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode)))
-            ) {
+            $value = $arrValues[$existingId];
+            if (!(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
                 continue;
             }
 
             $builder = $this->connection->createQueryBuilder();
             $builder->update($this->getValueTable(), 't');
-            foreach ($setValues as $setValueKey => $setValue) {
+            foreach ($this->getSetValues($value, $existingId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->set('t.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
             }
