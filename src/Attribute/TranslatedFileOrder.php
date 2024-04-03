@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2022 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,7 @@
  * @subpackage AttributeTranslatedFile
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2022 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -25,11 +25,14 @@
 namespace MetaModels\AttributeTranslatedFileBundle\Attribute;
 
 use Contao\StringUtil;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\IInternal;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
+
+use function array_key_exists;
 
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
@@ -49,7 +52,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(
+        return \array_merge(
             parent::getAttributeSettingNames(),
             [
                 'file_multiple',
@@ -92,15 +95,16 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     /**
      * {@inheritDoc}
      */
-    public function get($key)
+    public function get($strKey)
     {
         $metaModel = $this->getMetaModel();
 
         $mainColumnName = \substr($this->getColName(), 0, -\strlen('__sort'));
-        if (\in_array($key, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
-            $mainAttribute = $metaModel->getAttribute($mainColumnName);
+        if (\in_array($strKey, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
+            $attribute = $metaModel->getAttribute($mainColumnName);
+            assert($attribute instanceof IAttribute);
 
-            return $mainAttribute->get($key);
+            return $attribute->get($strKey);
         }
 
         return null;
@@ -113,7 +117,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      *
      * @return string An serialized array with binary data or a binary data.
      */
-    private function convert($values)
+    private function convert(mixed $values): string
     {
         $data = ToolboxFile::convertValuesToDatabase($values);
 
@@ -122,7 +126,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             return \serialize($data);
         }
 
-        return ($data[0] ?? null);
+        return ($data[0] ?? '');
     }
 
     /**
@@ -130,10 +134,6 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
-        if (empty($arrValue)) {
-            return [];
-        }
-
         return [
             'tstamp'        => \time(),
             'value_sorting' => $this->convert($arrValue['value_sorting'])
@@ -143,26 +143,25 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     /**
      * {@inheritDoc}
      */
-    public function setTranslatedDataFor($values, $langCode)
+    public function setTranslatedDataFor($arrValues, $strLangCode)
     {
         // First off determine those to be updated and those to be inserted.
-        $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($values), $langCode));
+        $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($arrValues), $strLangCode));
 
         foreach ($existingIds as $existingId) {
-            if (!isset($values[$existingId]['value_sorting']['bin'][0])
-                || !\count(($setValues = $this->getSetValues($values[$existingId], $existingId, $langCode)))
-            ) {
+            $value = $arrValues[$existingId];
+            if (!(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
                 continue;
             }
 
             $builder = $this->connection->createQueryBuilder();
             $builder->update($this->getValueTable(), 't');
-            foreach ($setValues as $setValueKey => $setValue) {
+            foreach ($this->getSetValues($value, $existingId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->set('t.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
             }
 
-            $this->addWhere($builder, $existingId, $langCode);
+            $this->addWhere($builder, $existingId, $strLangCode);
             $builder->executeQuery();
         }
     }
@@ -186,34 +185,33 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      * Add a where clause for the given id(s) and language code to the query builder.
      *
      * @param QueryBuilder         $builder     The query builder.
-     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     * @param string|string[]|null $mixIds      One, none or many ids to use.
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
      * @return void
      */
-    private function addWhere(QueryBuilder $builder, $mixIds, $mixLangCode = ''): void
+    private function addWhere(QueryBuilder $builder, array|string|null $mixIds, array|string $mixLangCode = ''): void
     {
         $builder
             ->andWhere($builder->expr()->eq('t.att_id', ':attributeID'))
             ->setParameter('attributeID', $this->get('id'));
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $builder
-                    ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
-                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
-            } else {
-                $builder
-                    ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
-                    ->setParameter('langcode', $mixLangCode);
-            }
+
+        if (\is_array($mixLangCode)) {
+            $builder
+                ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
+                ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
+        } else {
+            $builder
+                ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
+                ->setParameter('langcode', $mixLangCode);
         }
 
-        if (!empty($mixIds)) {
+        if (null !== $mixIds) {
             if (\is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))
-                    ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
+                    ->setParameter('itemIDs', \array_map('intval', $mixIds), ArrayParameterType::INTEGER);
             } else {
                 $builder
                     ->andWhere($builder->expr()->eq('t.item_id', ':itemID'))

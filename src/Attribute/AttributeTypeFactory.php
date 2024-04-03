@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -40,51 +41,51 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      *
      * @var Connection
      */
-    private $connection;
+    private Connection $connection;
     /**
      * The toolbox for file.
      *
      * @var ToolboxFile
      */
-    private $toolboxFile;
+    private ToolboxFile $toolboxFile;
 
     /**
      * The string util.
      *
-     * @var Adapter|StringUtil
+     * @var Adapter
      */
-    private $stringUtil;
+    private Adapter $stringUtil;
 
     /**
      * The validator.
      *
-     * @var Adapter|Validator
+     * @var Adapter
      */
-    private $validator;
+    private Adapter $validator;
 
     /**
      * The repository for files.
      *
-     * @var Adapter|FilesModel
+     * @var Adapter
      */
-    private $fileRepository;
+    private Adapter $fileRepository;
 
     /**
      * The contao configurations.
      *
-     * @var Adapter|Config
+     * @var Adapter
      */
-    private $config;
+    private Adapter $config;
 
     /**
      * Create a new instance.
      *
-     * @param Connection         $connection     Database connection.
-     * @param ToolboxFile        $toolboxFile    The toolbox for file.
-     * @param Adapter|StringUtil $stringUtil     The string util.
-     * @param Adapter|Validator  $validator      The validator.
-     * @param Adapter|FilesModel $fileRepository The repository for files.
-     * @param Adapter|Config     $config         The contao configurations.
+     * @param Connection  $connection     Database connection.
+     * @param ToolboxFile $toolboxFile    The toolbox for file.
+     * @param Adapter     $stringUtil     The string util.
+     * @param Adapter     $validator      The validator.
+     * @param Adapter     $fileRepository The repository for files.
+     * @param Adapter     $config         The contao configurations.
      */
     public function __construct(
         Connection $connection,

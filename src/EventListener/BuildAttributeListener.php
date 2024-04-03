@@ -42,7 +42,8 @@ class BuildAttributeListener
     {
         $attribute = $event->getAttribute();
 
-        if (!($attribute instanceof TranslatedFile)
+        if (
+            !($attribute instanceof TranslatedFile)
             || !$attribute->get('file_multiple')
         ) {
             return;
@@ -80,6 +81,9 @@ class BuildAttributeListener
             $container->setDefinition('metamodels.translatedfile-attributes', new AttributeTranslatedFileDefinition());
         }
 
-        $container->getDefinition('metamodels.translatedfile-attributes')->add($name);
+        $definition = $container->getDefinition('metamodels.translatedfile-attributes');
+        assert($definition instanceof AttributeTranslatedFileDefinition);
+
+        $definition->add($name);
     }
 }
