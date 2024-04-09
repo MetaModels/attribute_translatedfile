@@ -593,6 +593,10 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
+        foreach (array_diff($arrIds, array_keys($values)) as $key) {
+            $values[$key] = [];
+        }
+
         return $values;
     }
 }
