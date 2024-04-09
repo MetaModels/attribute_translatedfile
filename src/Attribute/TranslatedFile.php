@@ -557,7 +557,10 @@ class TranslatedFile extends TranslatedReference
 
         foreach ($newIds as $newId) {
             $value = $arrValues[$newId];
-            if (!(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))) {
+            if (
+                (null === $value)
+                || !(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))
+            ) {
                 continue;
             }
 

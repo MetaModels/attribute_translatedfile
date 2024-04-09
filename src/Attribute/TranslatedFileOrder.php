@@ -33,6 +33,15 @@ use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
 
 use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function in_array;
+use function is_array;
+use function serialize;
+use function strlen;
+use function substr;
+use function time;
 
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
@@ -52,7 +61,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
      */
     public function getAttributeSettingNames()
     {
-        return \array_merge(
+        return array_merge(
             parent::getAttributeSettingNames(),
             [
                 'file_multiple',
@@ -86,9 +95,9 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         $sortingValue = ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue);
         return [
-            'tstamp'        => \time(),
+            'tstamp'        => time(),
             'value_sorting' => $sortingValue,
-            'att_id'        => \substr($this->get('id'), 0, -\strlen('__sort'))
+            'att_id'        => substr($this->get('id'), 0, -strlen('__sort'))
         ];
     }
 
@@ -99,8 +108,8 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     {
         $metaModel = $this->getMetaModel();
 
-        $mainColumnName = \substr($this->getColName(), 0, -\strlen('__sort'));
-        if (\in_array($strKey, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
+        $mainColumnName = substr($this->getColName(), 0, -strlen('__sort'));
+        if (in_array($strKey, ['id', 'file_multiple']) && $metaModel->hasAttribute($mainColumnName)) {
             $attribute = $metaModel->getAttribute($mainColumnName);
             assert($attribute instanceof IAttribute);
 
@@ -123,7 +132,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         // Check single file or multiple file.
         if ($this->get('file_multiple')) {
-            return \serialize($data);
+            return serialize($data);
         }
 
         return ($data[0] ?? '');
@@ -135,7 +144,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
         return [
-            'tstamp'        => \time(),
+            'tstamp'        => time(),
             'value_sorting' => $this->convert($arrValue['value_sorting'])
         ];
     }
@@ -146,11 +155,14 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
     public function setTranslatedDataFor($arrValues, $strLangCode)
     {
         // First off determine those to be updated and those to be inserted.
-        $existingIds = \array_keys($this->getTranslatedDataFor(\array_keys($arrValues), $strLangCode));
+        $existingIds = array_keys($this->getTranslatedDataFor(array_keys($arrValues), $strLangCode));
 
         foreach ($existingIds as $existingId) {
             $value = $arrValues[$existingId];
-            if (!(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
+            if (
+                (null === $value)
+                || !(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))
+            ) {
                 continue;
             }
 
@@ -197,10 +209,10 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             ->setParameter('attributeID', $this->get('id'));
 
 
-        if (\is_array($mixLangCode)) {
+        if (is_array($mixLangCode)) {
             $builder
                 ->andWhere($builder->expr()->in('t.langcode', ':langcodes'))
-                ->setParameter('langcodes', \array_map('strval', $mixLangCode), ArrayParameterType::STRING);
+                ->setParameter('langcodes', array_map('strval', $mixLangCode), ArrayParameterType::STRING);
         } else {
             $builder
                 ->andWhere($builder->expr()->eq('t.langcode', ':langcode'))
@@ -208,10 +220,10 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         }
 
         if (null !== $mixIds) {
-            if (\is_array($mixIds)) {
+            if (is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in('t.item_id', ':itemIDs'))
-                    ->setParameter('itemIDs', \array_map('intval', $mixIds), ArrayParameterType::INTEGER);
+                    ->setParameter('itemIDs', array_map('intval', $mixIds), ArrayParameterType::INTEGER);
             } else {
                 $builder
                     ->andWhere($builder->expr()->eq('t.item_id', ':itemID'))
