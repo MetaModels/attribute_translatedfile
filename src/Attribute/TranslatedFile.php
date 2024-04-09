@@ -557,10 +557,7 @@ class TranslatedFile extends TranslatedReference
 
         foreach ($newIds as $newId) {
             $value = $arrValues[$newId];
-            if (
-                (null === $value)
-                || !(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))
-            ) {
+            if (!(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))) {
                 continue;
             }
 
@@ -594,6 +591,10 @@ class TranslatedFile extends TranslatedReference
             foreach ($values as $valueId => $value) {
                 $values[$valueId]['value_sorting'] = $sortedValues[$valueId]['value_sorting'];
             }
+        }
+
+        foreach (array_diff($arrIds, array_keys($values)) as $key) {
+            $values[$key] = [];
         }
 
         return $values;

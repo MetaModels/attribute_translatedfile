@@ -159,10 +159,7 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
 
         foreach ($existingIds as $existingId) {
             $value = $arrValues[$existingId];
-            if (
-                (null === $value)
-                || !(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))
-            ) {
+            if (!(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
                 continue;
             }
 
@@ -188,6 +185,10 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
             $values[$valueId]['value_sorting'] = ToolboxFile::convertUuidsOrPathsToMetaModels(
                 StringUtil::deserialize($value['value_sorting'], true)
             );
+        }
+
+        foreach (array_diff($arrIds, array_keys($values)) as $key) {
+            $values[$key] = [];
         }
 
         return $values;
