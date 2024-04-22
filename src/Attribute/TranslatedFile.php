@@ -530,7 +530,7 @@ class TranslatedFile extends TranslatedReference
     {
         // First off determine those to be updated and those to be inserted.
         $valueIds    = array_keys($arrValues);
-        $existingIds = array_keys($this->getTranslatedDataFor($valueIds, $strLangCode));
+        $existingIds = array_keys(array_filter($this->getTranslatedDataFor($valueIds, $strLangCode)));
         $newIds      = array_diff($valueIds, $existingIds);
 
         // Update existing values - delete if empty.
