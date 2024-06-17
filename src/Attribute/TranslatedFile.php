@@ -536,7 +536,8 @@ class TranslatedFile extends TranslatedReference
         // Update existing values - delete if empty.
         $builder = $this->connection->createQueryBuilder();
         foreach ($existingIds as $existingId) {
-            $value = $arrValues[$existingId];
+            // Can be null for NEW items (as the values do not get initialized for `new Item()`.
+            $value = $arrValues[$existingId] ?? [];
             if (array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false))) {
                 $builder->update($this->getValueTable());
                 foreach ($this->getSetValues($value, $existingId, $strLangCode) as $setValueKey => $setValue) {
@@ -556,7 +557,8 @@ class TranslatedFile extends TranslatedReference
         $builder->insert($this->getValueTable());
 
         foreach ($newIds as $newId) {
-            $value = $arrValues[$newId];
+            // Can be null for NEW items (as the values do not get initialized for `new Item()`.
+            $value = $arrValues[$newId] ?? [];
             if (!(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))) {
                 continue;
             }
