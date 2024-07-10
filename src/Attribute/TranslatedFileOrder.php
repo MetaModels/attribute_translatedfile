@@ -158,13 +158,14 @@ class TranslatedFileOrder extends TranslatedReference implements IInternal
         $existingIds = array_keys($this->getTranslatedDataFor(array_keys($arrValues), $strLangCode));
 
         foreach ($existingIds as $existingId) {
-            $value = $arrValues[$existingId];
-            if (!(array_key_exists('value', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
+            $value = $arrValues[$existingId] ?? [];
+            if (!(array_key_exists('value_sorting', $value) && ((bool) ($value['value_sorting']['bin'][0] ?? false)))) {
                 continue;
             }
 
             $builder = $this->connection->createQueryBuilder();
             $builder->update($this->getValueTable(), 't');
+            /** @psalm-suppress InvalidArgument */
             foreach ($this->getSetValues($value, $existingId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->set('t.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
