@@ -128,7 +128,7 @@ class TranslatedFile extends TranslatedReference
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
-            $toolboxFile = System::getContainer()->get('metamodels.attribute_file.toolbox.file');
+            $toolboxFile = System::getContainer()->get('MetaModels\Helper\ToolboxFile');
             assert($toolboxFile instanceof ToolboxFile);
         }
         $this->toolboxFile = $toolboxFile;
