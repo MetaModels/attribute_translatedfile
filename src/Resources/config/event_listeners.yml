@@ -15,11 +15,10 @@ services:
                 method: buildAttribute
 
     metamodels.attribute_translatedfile.event_listener.image_size_options:
-        class: MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions
-        tags:
-            -   name: kernel.event_listener
-                event: dc-general.view.contao2backend.get-property-options
-                method: getPropertyOptions
+        class: MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptionsProvider
+        arguments:
+            $imageSizes: '@contao.image.sizes'
+            $translator: '@translator'
 
     metamodels.attribute_translatedfile.event_listener.remove_type_options:
         class: MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attribute\RemoveTypeOptions
@@ -43,6 +42,17 @@ services:
         $scopeDeterminator: '@cca.dc-general.scope-matcher'
         $factory: '@MetaModels\IFactory'
         $connection: '@database_connection'
+      tags:
+        - name: kernel.event_listener
+          event: dc-general.view.contao2backend.get-property-options
+
+    MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\RenderSetting\FileImageSizeOptions:
+      public: false
+      arguments:
+        $scopeDeterminator: '@cca.dc-general.scope-matcher'
+        $factory: '@MetaModels\IFactory'
+        $connection: '@database_connection'
+        $optionsProvider: '@metamodels.attribute_translatedfile.event_listener.image_size_options'
       tags:
         - name: kernel.event_listener
           event: dc-general.view.contao2backend.get-property-options

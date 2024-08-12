@@ -31,7 +31,7 @@ use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attri
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\DcaSetting\FileWidgetModeOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\FilterSetting\RemoveAttIdOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptions;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptionsProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
