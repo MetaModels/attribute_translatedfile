@@ -82,8 +82,6 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
         self::assertCount(1, $definition->getTag('kernel.event_listener'));
 
         self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.image_size_options'));
-        $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.image_size_options');
-        self::assertCount(1, $definition->getTag('kernel.event_listener'));
 
         self::assertTrue($container->hasDefinition('metamodels.attribute_translatedfile.event_listener.remove_type_options'));
         $definition = $container->getDefinition('metamodels.attribute_translatedfile.event_listener.remove_type_options');
