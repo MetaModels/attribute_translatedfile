@@ -6,11 +6,10 @@
     "Contao\\ManagerPlugin\\Bundle\\Config\\BundleConfig",
     "Contao\\ManagerPlugin\\Bundle\\Parser\\ParserInterface",
     "Contao\\ManagerPlugin\\Routing\\RoutingPluginInterface",
-    "Doctrine\\Bundle\\DoctrineBundle\\DoctrineBundle",
-    "Doctrine\\DBAL\\ArrayParameterType",
-    "Doctrine\\DBAL\\Connection",
-    "Doctrine\\DBAL\\Query\\QueryBuilder",
-    "Symfony\\Component\\Config\\FileLocator",
-    "tl_user_group"
+    "InspiredMinds\\ContaoFileUsage\\Provider\\FileUsageProviderInterface",
+    "InspiredMinds\\ContaoFileUsage\\Result\\FileTreeMultipleResult",
+    "InspiredMinds\\ContaoFileUsage\\Result\\FileTreeSingleResult",
+    "InspiredMinds\\ContaoFileUsage\\Result\\ResultInterface",
+    "InspiredMinds\\ContaoFileUsage\\Result\\ResultsCollection"
   ]
 }
