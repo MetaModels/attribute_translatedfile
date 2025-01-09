@@ -50,9 +50,11 @@ use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_merge;
+use function array_values;
 use function is_array;
 use function serialize;
 use function sprintf;
+use function str_replace;
 use function time;
 use function trigger_error;
 use function trim;
@@ -380,6 +382,7 @@ class TranslatedFile extends TranslatedReference
                 'file_validFileTypes',
                 'file_filesOnly',
                 'file_widgetMode',
+                'searchable',
                 'mandatory',
             ]
         );
@@ -600,5 +603,58 @@ class TranslatedFile extends TranslatedReference
         }
 
         return $values;
+    }
+
+    /**
+     * Search for file names or UUIDs.
+     * Find items if one or more files are stored (serialised array) or the parent folder has been selected.
+     *
+     * {@inheritdoc}
+     */
+    public function searchForInLanguages($strPattern, $arrLanguages = []): ?array
+    {
+        $subSelect = $this->connection->createQueryBuilder();
+        $subSelect
+            ->select('f.uuid', 'f.pid')
+            ->from('tl_files', 'f');
+
+        if (Validator::isUuid($uuid = str_replace('*', '', $strPattern))) {
+            $subSelect
+                ->where(('f.uuid = :value'))
+                ->setParameter('value', StringUtil::uuidToBin($uuid));
+        } else {
+            $subSelect
+                ->where($subSelect->expr()->like('f.name', ':value'))
+                ->setParameter('value', str_replace(['*', '?'], ['%', '_'], $strPattern));
+        }
+
+        if ([] === ($subResults = $subSelect->executeQuery()->fetchAllAssociative())) {
+            return [];
+        }
+
+        $builder = $this->connection->createQueryBuilder();
+        $builder
+            ->select('t.item_id')
+            ->from($this->getValueTable(), 't')
+            ->where('t.att_id = :attributeId')
+            ->setParameter('attributeId', $this->get('id'));
+
+        $uuids = [];
+        foreach ($subResults as $subResult) {
+            $uuids[$subResult['pid']]  = $subResult['pid'];
+            $uuids[$subResult['uuid']] = $subResult['uuid'];
+        }
+
+        $orX = [];
+        foreach (array_values($uuids) as $key => $uuid) {
+            $orX[] = sprintf('t.value LIKE :value_%s', $key);
+            $builder->setParameter('value_' . $key, '%' . $uuid . '%');
+        }
+        $builder->andWhere($builder->expr()->or(...$orX));
+
+        $statement = $builder->executeQuery();
+
+        // Return value list as list<mixed>, parent function wants a list<string> so we make a cast.
+        return array_map(static fn(mixed $value) => (string) $value, $statement->fetchFirstColumn());
     }
 }
