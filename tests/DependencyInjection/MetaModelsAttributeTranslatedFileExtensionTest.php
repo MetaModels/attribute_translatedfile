@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2024 The MetaModels team.
+ * (c) 2012-2025 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,23 +15,16 @@
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2024 The MetaModels team.
+ * @copyright  2012-2025 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
 namespace MetaModels\AttributeTranslatedFileBundle\Test\DependencyInjection;
 
-use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory;
-use MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedFileBundle\DependencyInjection\MetaModelsAttributeTranslatedFileExtension;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildAttributeListener;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\BuildDataDefinitionListener;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\Attribute\RemoveTypeOptions;
 use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\DcaSetting\FileWidgetModeOptions;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\FilterSetting\RemoveAttIdOptions;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation;
-use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptionsProvider;
+use MetaModels\AttributeTranslatedFileBundle\MetaModelsAttributeTranslatedFileBundle;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -57,6 +50,7 @@ class MetaModelsAttributeTranslatedFileExtensionTest extends TestCase
     public function testFactoryIsRegistered(): void
     {
         $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles', [MetaModelsAttributeTranslatedFileBundle::class]);
 
         $extension = new MetaModelsAttributeTranslatedFileExtension();
         $extension->load([], $container);
