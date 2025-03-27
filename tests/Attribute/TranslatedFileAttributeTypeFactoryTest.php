@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2021 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2021 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -44,6 +45,8 @@ use MetaModels\Attribute\IAttributeFactory;
  * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeTypeFactory
  * @covers \MetaModels\AttributeTranslatedFileBundle\Attribute\AttributeOrderTypeFactory
  * @covers \MetaModels\AttributeTranslatedFileBundle\EventListener\Factory\AddAttributeInformation
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class TranslatedFileAttributeTypeFactoryTest extends TestCase
 {
@@ -51,9 +54,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
      * Mock a MetaModel.
      *
      * @param string $tableName        The table name.
-     *
      * @param string $language         The language.
-     *
      * @param string $fallbackLanguage The fallback language.
      *
      * @return IMetaModel
@@ -115,7 +116,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
      *
      * @return MockObject|Connection
      */
-    private function mockConnection()
+    private function mockConnection(): Connection|MockObject
     {
         return $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
@@ -190,7 +191,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
         return $factory;
     }
 
-    private function createEventDispatcher()
+    private function createEventDispatcher(): EventDispatcher
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(
@@ -214,11 +215,20 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
         $fileRepository = $this->createMock(Adapter::class);
         $config         = $this->createMock(Adapter::class);
 
-        return [new AttributeTypeFactory($this->mockConnection(), $toolbox, $stringUtil, $validator, $fileRepository, $config)];
+        return [
+            new AttributeTypeFactory(
+                $this->mockConnection(),
+                $toolbox,
+                $stringUtil,
+                $validator,
+                $fileRepository,
+                $config
+            )
+        ];
     }
 
     /**
-     * Test creation of an translated select.
+     * Test creation of a translated select.
      *
      * @return void
      */
@@ -248,7 +258,7 @@ class TranslatedFileAttributeTypeFactoryTest extends TestCase
     }
 
     /**
-     * Test creation of an translated select.
+     * Test creation of a translated select.
      *
      * @return void
      */

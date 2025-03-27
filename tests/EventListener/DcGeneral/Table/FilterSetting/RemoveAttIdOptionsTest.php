@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2021 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,7 +12,8 @@
  *
  * @package    MetaModels/attribute_translatedfile
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2021 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -84,10 +85,30 @@ class RemoveAttIdOptionsTest extends TestCase
     {
 
         return [
-            [['foo' => 'bar [translatedfile]', 'filesort' => 'foo'], 'foo', 'foo', ['foo' => 'bar [translatedfile]', 'filesort' => 'foo']],
-            [['foo' => 'bar [translatedfile]', 'filesort' => 'foo'], 'foo', 'attr_id', ['foo' => 'bar [translatedfile]', 'filesort' => 'foo']],
-            [['foo' => 'bar [translatedfile]'], 'tl_metamodel_filtersetting', 'attr_id', ['foo' => 'bar [translatedfile]']],
-            [['foo' => 'bar [translatedfile]'], 'tl_metamodel_filtersetting', 'attr_id', ['foo' => 'bar [translatedfile]', 'foo__sort' => 'foo']]
+            [
+                ['foo' => 'bar [translatedfile]', 'filesort' => 'foo'],
+                'foo',
+                'foo',
+                ['foo' => 'bar [translatedfile]', 'filesort' => 'foo']
+            ],
+            [
+                ['foo' => 'bar [translatedfile]', 'filesort' => 'foo'],
+                'foo',
+                'attr_id',
+                ['foo' => 'bar [translatedfile]', 'filesort' => 'foo']
+            ],
+            [
+                ['foo' => 'bar [translatedfile]'],
+                'tl_metamodel_filtersetting',
+                'attr_id',
+                ['foo' => 'bar [translatedfile]']
+            ],
+            [
+                ['foo' => 'bar [translatedfile]'],
+                'tl_metamodel_filtersetting',
+                'attr_id',
+                ['foo' => 'bar [translatedfile]', 'foo__sort' => 'foo']
+            ]
         ];
     }
 

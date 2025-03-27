@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2017 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,8 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedFile
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2017 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_file/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -41,8 +42,8 @@ class BuildAttributeListener
     public function buildAttribute(BuildAttributeEvent $event)
     {
         $attribute = $event->getAttribute();
-
-        if (!($attribute instanceof TranslatedFile)
+        if (
+            !($attribute instanceof TranslatedFile)
             || !$attribute->get('file_multiple')
         ) {
             return;
@@ -51,17 +52,16 @@ class BuildAttributeListener
         $container  = $event->getContainer();
         $properties = $container->getPropertiesDefinition();
         $name       = $attribute->getColName();
+        $nameSort   = \sprintf('%s__sort', $name);
 
-        if ($properties->hasProperty($name . '__sort')) {
-            $this->addAttributeToDefinition($container, $name);
-
-            $properties->getProperty($name . '__sort')->setWidgetType('fileTreeOrder');
-
-            return;
+        if (!$properties->hasProperty($nameSort)) {
+            $properties->addProperty(new DefaultProperty($nameSort));
         }
 
-        $properties->addProperty($property = new DefaultProperty($name . '__sort'));
-        $property->setWidgetType('fileTreeOrder');
+        $properties->getProperty($nameSort)
+            ->setWidgetType('fileTreeOrder')
+            ->setLabel($nameSort)
+            ->setExtra(['tl_class' => 'hidden']);
 
         $this->addAttributeToDefinition($container, $name);
     }
@@ -74,12 +74,15 @@ class BuildAttributeListener
      *
      * @return void
      */
-    protected function addAttributeToDefinition(ContainerInterface $container, $name)
+    private function addAttributeToDefinition(ContainerInterface $container, string $name): void
     {
         if (!$container->hasDefinition('metamodels.translatedfile-attributes')) {
             $container->setDefinition('metamodels.translatedfile-attributes', new AttributeTranslatedFileDefinition());
         }
 
-        $container->getDefinition('metamodels.translatedfile-attributes')->add($name);
+        $definition = $container->getDefinition('metamodels.translatedfile-attributes');
+        assert($definition instanceof AttributeTranslatedFileDefinition);
+
+        $definition->add($name);
     }
 }

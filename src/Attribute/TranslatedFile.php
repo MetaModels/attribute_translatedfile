@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedfile.
  *
- * (c) 2012-2022 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,7 +22,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Oliver Willmes <info@oliverwillmes.de>
- * @copyright  2012-2022 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedfile/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -35,65 +35,85 @@ use Contao\FilesModel;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Validator;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use InvalidArgumentException;
+use MetaModels\Attribute\ITranslated;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\Helper\ToolboxFile;
 use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
 
+use function array_diff;
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function array_merge;
+use function array_values;
+use function is_array;
+use function serialize;
+use function sprintf;
+use function str_replace;
+use function time;
+use function trigger_error;
+use function trim;
+
 /**
  * This is the MetaModelAttribute class for handling translated file fields.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class TranslatedFile extends TranslatedReference
 {
     /**
      * The toolbox for file.
      *
-     * @var ToolboxFile|null
+     * @var ToolboxFile
      */
-    private $toolboxFile;
+    private ToolboxFile $toolboxFile;
 
     /**
      * The string util.
      *
-     * @var Adapter|StringUtil|null
+     * @var Adapter<StringUtil>
      */
-    private $stringUtil;
+    private Adapter $stringUtil;
 
     /**
      * The validator.
      *
-     * @var Adapter|Validator|null
+     * @var Adapter<Validator>
      */
-    private $validator;
+    private Adapter $validator;
 
     /**
      * The repository for files.
      *
-     * @var Adapter|FilesModel|null
+     * @var Adapter<FilesModel>
      */
-    private $fileRepository;
+    private Adapter $fileRepository;
 
     /**
      * The contao configurations.
      *
-     * @var Adapter|Config|null
+     * @var Adapter<Config>
      */
-    private $config;
+    private Adapter $config;
 
     /**
-     * {@inheritDoc}
+     * Create a new instance.
      *
-     * @param ToolboxFile|null        $toolboxFile    The toolbox for file.
-     * @param Adapter|StringUtil|null $stringUtil     The string util.
-     * @param Adapter|Validator|null  $validator      The validator.
-     * @param Adapter|FilesModel|null $fileRepository The repository for files.
-     * @param Adapter|Config|null     $config         The contao configurations.
+     * @param ToolboxFile|null $toolboxFile    The toolbox for file.
+     * @param Adapter|null     $stringUtil     The string util.
+     * @param Adapter|null     $validator      The validator.
+     * @param Adapter|null     $fileRepository The repository for files.
+     * @param Adapter|null     $config         The contao configurations.
      */
     public function __construct(
         IMetaModel $objMetaModel,
-        $arrData = [],
+        array $arrData = [],
         Connection $connection = null,
         ToolboxFile $toolboxFile = null,
         Adapter $stringUtil = null,
@@ -105,63 +125,67 @@ class TranslatedFile extends TranslatedReference
 
         if (null === $toolboxFile) {
             // @codingStandardsIgnoreStart
-            @\trigger_error(
+            @trigger_error(
                 'Toolbox file is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
-            $toolboxFile = System::getContainer()->get('metamodels.attribute_file.toolbox.file');
+            $toolboxFile = System::getContainer()->get('MetaModels\Helper\ToolboxFile');
+            assert($toolboxFile instanceof ToolboxFile);
         }
+        $this->toolboxFile = $toolboxFile;
 
         if (null === $stringUtil) {
             // @codingStandardsIgnoreStart
-            @\trigger_error(
+            @trigger_error(
                 'String util file is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
 
-            $stringUtil = System::getContainer()->get('contao.framework')->getAdapter(StringUtil::class);
+            $stringUtil = System::getContainer()->get('contao.framework')?->getAdapter(StringUtil::class);
+            assert($stringUtil instanceof Adapter);
         }
+        $this->stringUtil = $stringUtil;
 
         if (null === $validator) {
             // @codingStandardsIgnoreStart
-            @\trigger_error(
+            @trigger_error(
                 'Validator is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
 
-            $validator = System::getContainer()->get('contao.framework')->getAdapter(Validator::class);
+            $validator = System::getContainer()->get('contao.framework')?->getAdapter(Validator::class);
+            assert($validator instanceof Adapter);
         }
+        $this->validator = $validator;
 
         if (null === $fileRepository) {
             // @codingStandardsIgnoreStart
-            @\trigger_error(
+            @trigger_error(
                 'File repository is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
 
-            $fileRepository = System::getContainer()->get('contao.framework')->getAdapter(FilesModel::class);
+            $fileRepository = System::getContainer()->get('contao.framework')?->getAdapter(FilesModel::class);
+            assert($fileRepository instanceof Adapter);
         }
+        $this->fileRepository = $fileRepository;
 
         if (null === $config) {
             // @codingStandardsIgnoreStart
-            @\trigger_error(
+            @trigger_error(
                 'Config is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             // @codingStandardsIgnoreEnd
 
-            $config = System::getContainer()->get('contao.framework')->getAdapter(Config::class);
+            $config = System::getContainer()->get('contao.framework')?->getAdapter(Config::class);
+            assert($config instanceof Adapter);
         }
-
-        $this->toolboxFile    = $toolboxFile;
-        $this->stringUtil     = $stringUtil;
-        $this->validator      = $validator;
-        $this->fileRepository = $fileRepository;
-        $this->config         = $config;
+        $this->config = $config;
     }
 
     /**
@@ -188,24 +212,22 @@ class TranslatedFile extends TranslatedReference
         $procedure  = 't.att_id=?';
         $parameters = [$this->get('id')];
 
-        if (!empty($mixIds)) {
-            if (\is_array($mixIds)) {
+        if (null !== $mixIds) {
+            if (is_array($mixIds)) {
                 $procedure .= ' AND t.item_id IN (' . $this->parameterMask($mixIds) . ')';
-                $parameters = \array_merge($parameters, $mixIds);
+                $parameters = array_merge($parameters, $mixIds);
             } else {
                 $procedure   .= ' AND t.item_id=?';
                 $parameters[] = $mixIds;
             }
         }
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $procedure .= ' AND t.langcode IN (' . $this->parameterMask($mixLangCode) . ')';
-                $parameters = \array_merge($parameters, $mixLangCode);
-            } else {
-                $procedure   .= ' AND t.langcode=?';
-                $parameters[] = $mixLangCode;
-            }
+        if (is_array($mixLangCode)) {
+            $procedure .= ' AND t.langcode IN (' . $this->parameterMask($mixLangCode) . ')';
+            $parameters = array_merge($parameters, $mixLangCode);
+        } else {
+            $procedure   .= ' AND t.langcode=?';
+            $parameters[] = $mixLangCode;
         }
 
         return [
@@ -218,22 +240,27 @@ class TranslatedFile extends TranslatedReference
      * Add a where clause for the given id(s) and language code to the query builder.
      *
      * @param QueryBuilder         $builder     The query builder.
-     * @param string[]|string|null $mixIds      One, none or many ids to use.
+     * @param string|string[]|null $mixIds      One, none or many ids to use.
+     * @param string               $table       The table.
      * @param string|string[]      $mixLangCode The language code/s to use, optional.
      *
      * @return void
      */
-    private function addWhere(QueryBuilder $builder, $mixIds, $table, $mixLangCode = ''): void
-    {
+    private function addWhere(
+        QueryBuilder $builder,
+        array|string|null $mixIds,
+        string $table,
+        array|string $mixLangCode = ''
+    ): void {
         $builder
             ->andWhere($builder->expr()->eq($table . '.att_id', ':attributeID'))
-            ->setParameter(':attributeID', $this->get('id'));
+            ->setParameter('attributeID', $this->get('id'));
 
-        if (!empty($mixIds)) {
-            if (\is_array($mixIds)) {
+        if (null !== $mixIds) {
+            if (is_array($mixIds)) {
                 $builder
                     ->andWhere($builder->expr()->in($table . '.item_id', ':itemIDs'))
-                    ->setParameter('itemIDs', \array_map('intval', $mixIds), Connection::PARAM_INT_ARRAY);
+                    ->setParameter('itemIDs', array_map('intval', $mixIds), ArrayParameterType::INTEGER);
             } else {
                 $builder
                     ->andWhere($builder->expr()->eq($table . '.item_id', ':itemID'))
@@ -241,39 +268,50 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if (!empty($mixLangCode)) {
-            if (\is_array($mixLangCode)) {
-                $builder
-                    ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
-                    ->setParameter('langcodes', \array_map('strval', $mixLangCode), Connection::PARAM_STR_ARRAY);
-            } else {
-                $builder
-                    ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
-                    ->setParameter('langcode', $mixLangCode);
-            }
+        if (is_array($mixLangCode)) {
+            $builder
+                ->andWhere($builder->expr()->in($table . '.langcode', ':langcodes'))
+                ->setParameter('langcodes', array_map('strval', $mixLangCode), ArrayParameterType::STRING);
+        } else {
+            $builder
+                ->andWhere($builder->expr()->eq($table . '.langcode', ':langcode'))
+                ->setParameter('langcode', $mixLangCode);
         }
     }
 
     /**
      * {@inheritdoc}
      *
-     * @throws \InvalidArgumentException If no binary in value throw invalid exception.
+     * @throws InvalidArgumentException If no binary in value throw invalid exception.
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function prepareTemplate(Template $template, $rowData, $settings)
+    protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
     {
-        parent::prepareTemplate($template, $rowData, $settings);
+        parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
 
-        $value = $rowData[$this->getColName()]['value'];
+        /** @var array{
+         *    bin: list<string>,
+         *    value: list<string>,
+         *    path: list<string>,
+         *    meta: list<string>,
+         *    bin_sorted?: list<string>,
+         *    value_sorted?: list<string>,
+         *    path_sorted?: list<string>,
+         *    meta_sorted?: list<string>
+         *  }|null $value */
+        $value = $arrRowData[$this->getColName()]['value'] ?? null;
+
+        if (null === $value) {
+            $value = ['bin' => [], 'value' => [], 'path' => [], 'meta' => []];
+        }
 
         // No data and show image, check placeholder.
-        if (!($value['bin'] ?? null)) {
-            if (null === $settings->get('file_showImage')
-                || null === ($placeholder = $settings->get('file_placeholder'))) {
-                $template->files = [];
-                $template->src   = [];
+        if ([] === $value['bin']) {
+            if (null === ($placeholder = $objSettings->get('file_placeholder'))) {
+                $objTemplate->files = [];
+                $objTemplate->src   = [];
 
                 return;
             }
@@ -283,54 +321,51 @@ class TranslatedFile extends TranslatedReference
         }
 
         $toolbox = clone $this->toolboxFile;
+
+        /** @psalm-suppress DeprecatedMethod */
         $toolbox
             ->setBaseLanguage($this->getMetaModel()->getActiveLanguage())
             ->setFallbackLanguage($this->getMetaModel()->getFallbackLanguage())
             ->setLightboxId(
-                \sprintf(
+                sprintf(
                     '%s.%s.%s',
                     $this->getMetaModel()->getTableName(),
-                    $settings->get('id'),
-                    $rowData['id']
+                    (string) ($objSettings->get('id') ?? ''),
+                    (string) ($arrRowData['id'] ?? '0')
                 )
             )
-            ->setShowImages($settings->get('file_showImage'));
+            ->setShowImages((bool) $objSettings->get('file_showImage'));
 
-        if (($types = \trim($this->get('file_validFileTypes')))) {
+        if (($types = trim($this->get('file_validFileTypes')))) {
             $toolbox->setAcceptedExtensions($types);
         }
 
-        if ($settings->get('file_imageSize')) {
-            $toolbox->setResizeImages($settings->get('file_imageSize'));
+        if (is_array($imageSize = $objSettings->get('file_imageSize'))) {
+            $toolbox->setResizeImages($imageSize);
         }
 
-        if (isset($value['value'])) {
-            foreach ($value['value'] as $strFile) {
-                $toolbox->addPathById($strFile);
-            }
-        } elseif (\is_array($value)) {
-            foreach ($value as $strFile) {
-                $toolbox->addPathById($strFile);
-            }
-        } else {
-            $toolbox->addPathById($value);
+        foreach ($value['value'] ?? [] as $strFile) {
+            $toolbox->addPathById($strFile);
         }
 
         $data = [];
-        $toolbox->withDownloadKeys($settings->get('file_showLink') && $settings->get('file_protectedDownload'));
+        $toolbox->withDownloadKeys(
+            (bool) $objSettings->get('file_showLink') && (bool) $objSettings->get('file_protectedDownload')
+        );
         $toolbox->resolveFiles();
-        if ('manual' !== $settings->get('file_sortBy')) {
-            $data = $toolbox->sortFiles($settings->get('file_sortBy'));
+
+        if ('manual' !== $objSettings->get('file_sortBy')) {
+            $data = $toolbox->sortFiles(($objSettings->get('file_sortBy') ?? ''));
         }
-        if ('manual' === $settings->get('file_sortBy')) {
+        if ('manual' === $objSettings->get('file_sortBy')) {
             $data = $toolbox->sortFiles(
-                $settings->get('file_sortBy'),
-                ($rowData[$this->getColName()]['value_sorting']['bin'] ?? [])
+                ($objSettings->get('file_sortBy') ?? ''),
+                ($arrRowData[$this->getColName()]['value_sorting']['bin'] ?? [])
             );
         }
 
-        $template->files = $data['files'];
-        $template->src   = $data['source'];
+        $objTemplate->files = $data['files'];
+        $objTemplate->src   = $data['source'];
     }
 
     /**
@@ -338,7 +373,7 @@ class TranslatedFile extends TranslatedReference
      */
     public function getAttributeSettingNames()
     {
-        return \array_merge(
+        return array_merge(
             parent::getAttributeSettingNames(),
             [
                 'file_multiple',
@@ -347,6 +382,7 @@ class TranslatedFile extends TranslatedReference
                 'file_validFileTypes',
                 'file_filesOnly',
                 'file_widgetMode',
+                'searchable',
                 'mandatory',
             ]
         );
@@ -365,10 +401,8 @@ class TranslatedFile extends TranslatedReference
             // Set root path of file chooser depending on contao version.
             $file = null;
 
-            if ($this->validator->isStringUuid($this->get('file_uploadFolder'))
-                || $this->validator->isBinaryUuid($this->get('file_uploadFolder'))
-            ) {
-                $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder'));
+            if ($this->validator->isUuid($this->get('file_uploadFolder') ?? '')) {
+                $file = $this->fileRepository->findByUuid($this->get('file_uploadFolder') ?? '');
             }
 
             // Check if we have a file.
@@ -380,7 +414,7 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
-        if ($this->get('file_validFileTypes')) {
+        if (null !== $this->get('file_validFileTypes')) {
             $fieldDefinition['eval']['extensions'] = $this->get('file_validFileTypes');
         }
 
@@ -412,7 +446,8 @@ class TranslatedFile extends TranslatedReference
 
         $widgetMode = $this->getOverrideValue('file_widgetMode', $arrOverrides);
 
-        if (('normal' !== $widgetMode)
+        if (
+            ('normal' !== $widgetMode)
             && ((bool) $this->get('file_multiple'))
         ) {
             $fieldDefinition['eval']['orderField'] = $this->getColName() . '__sort';
@@ -454,7 +489,7 @@ class TranslatedFile extends TranslatedReference
     public function widgetToValue($varValue, $itemId)
     {
         return [
-            'tstamp' => \time(),
+            'tstamp' => time(),
             'value'  => ToolboxFile::convertUuidsOrPathsToMetaModels((array) $varValue),
             'att_id' => $this->get('id')
         ];
@@ -465,15 +500,15 @@ class TranslatedFile extends TranslatedReference
      *
      * @param mixed $mixValues The data to serialize.
      *
-     * @return string An serialized array with binary data or a binary data.
+     * @return string|null An serialized array with binary data or a binary data.
      */
-    private function convert($mixValues)
+    private function convert(mixed $mixValues): ?string
     {
         $data = ToolboxFile::convertValuesToDatabase($mixValues);
 
         // Check single file or multiple file.
-        return $this->get('file_multiple')
-            ? \serialize($data)
+        return (bool) $this->get('file_multiple')
+            ? serialize($data)
             : ($data[0] ?? null);
     }
 
@@ -483,8 +518,8 @@ class TranslatedFile extends TranslatedReference
     protected function getSetValues($arrValue, $intId, $strLangCode)
     {
         return [
-            'tstamp'   => \time(),
-            'value'    => (!empty($arrValue)) ? $this->convert($arrValue['value']) : null,
+            'tstamp'   => time(),
+            'value'    => $this->convert($arrValue['value']),
             'att_id'   => $this->get('id'),
             'langcode' => $strLangCode,
             'item_id'  => $intId
@@ -497,42 +532,45 @@ class TranslatedFile extends TranslatedReference
     public function setTranslatedDataFor($arrValues, $strLangCode)
     {
         // First off determine those to be updated and those to be inserted.
-        $valueIds    = \array_keys($arrValues);
-        $existingIds = \array_keys($this->getTranslatedDataFor($valueIds, $strLangCode));
-        $newIds      = \array_diff($valueIds, $existingIds);
+        $valueIds    = array_keys($arrValues);
+        $existingIds = array_keys(array_filter($this->getTranslatedDataFor($valueIds, $strLangCode)));
+        $newIds      = array_diff($valueIds, $existingIds);
 
         // Update existing values - delete if empty.
         $builder = $this->connection->createQueryBuilder();
         foreach ($existingIds as $existingId) {
-            if ($arrValues[$existingId]['value']['bin'][0]) {
-                $setValues = $this->getSetValues($arrValues[$existingId], $existingId, $strLangCode);
+            // Can be null for NEW items (as the values do not get initialized for `new Item()`.
+            $value = $arrValues[$existingId] ?? [];
+            if (array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false))) {
                 $builder->update($this->getValueTable());
-                foreach ($setValues as $setValueKey => $setValue) {
+                foreach ($this->getSetValues($value, $existingId, $strLangCode) as $setValueKey => $setValue) {
                     $builder->set($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
-                    $builder->setParameter(':' . $setValueKey, $setValue);
+                    $builder->setParameter($setValueKey, $setValue);
                 }
             } else {
                 $builder->delete($this->getValueTable());
             }
 
             $this->addWhere($builder, $existingId, $this->getValueTable(), $strLangCode);
-            $builder->execute();
+            $builder->executeQuery();
         }
 
         // Insert the new values - if not empty.
         $builder = $this->connection->createQueryBuilder();
         $builder->insert($this->getValueTable());
+
         foreach ($newIds as $newId) {
-            if (!$arrValues[$newId]['value']['bin'][0]) {
+            // Can be null for NEW items (as the values do not get initialized for `new Item()`.
+            $value = $arrValues[$newId] ?? [];
+            if (!(array_key_exists('value', $value) && ((bool) ($value['value']['bin'][0] ?? false)))) {
                 continue;
             }
 
-            foreach ($this->getSetValues($arrValues[$newId], $newId, $strLangCode) as $setValueKey => $setValue) {
+            foreach ($this->getSetValues($value, $newId, $strLangCode) as $setValueKey => $setValue) {
                 $builder->setValue($this->getValueTable() . '.' . $setValueKey, ':' . $setValueKey);
                 $builder->setParameter($setValueKey, $setValue);
-                $setValues[$this->getValueTable() . '.' . $setValueKey] = $setValue;
             }
-            $builder->execute();
+            $builder->executeQuery();
         }
     }
 
@@ -552,6 +590,7 @@ class TranslatedFile extends TranslatedReference
 
         if ($metaModel->hasAttribute($this->getColName() . '__sort')) {
             $orderAttribute = $metaModel->getAttribute($this->getColName() . '__sort');
+            assert($orderAttribute instanceof ITranslated);
 
             $sortedValues = $orderAttribute->getTranslatedDataFor($arrIds, $strLangCode);
             foreach ($values as $valueId => $value) {
@@ -559,6 +598,63 @@ class TranslatedFile extends TranslatedReference
             }
         }
 
+        foreach (array_diff($arrIds, array_keys($values)) as $key) {
+            $values[$key] = [];
+        }
+
         return $values;
+    }
+
+    /**
+     * Search for file names or UUIDs.
+     * Find items if one or more files are stored (serialised array) or the parent folder has been selected.
+     *
+     * {@inheritdoc}
+     */
+    public function searchForInLanguages($strPattern, $arrLanguages = []): ?array
+    {
+        $subSelect = $this->connection->createQueryBuilder();
+        $subSelect
+            ->select('f.uuid', 'f.pid')
+            ->from('tl_files', 'f');
+
+        if (Validator::isUuid($uuid = str_replace('*', '', $strPattern))) {
+            $subSelect
+                ->where(('f.uuid = :value'))
+                ->setParameter('value', StringUtil::uuidToBin($uuid));
+        } else {
+            $subSelect
+                ->where($subSelect->expr()->like('f.name', ':value'))
+                ->setParameter('value', str_replace(['*', '?'], ['%', '_'], $strPattern));
+        }
+
+        if ([] === ($subResults = $subSelect->executeQuery()->fetchAllAssociative())) {
+            return [];
+        }
+
+        $builder = $this->connection->createQueryBuilder();
+        $builder
+            ->select('t.item_id')
+            ->from($this->getValueTable(), 't')
+            ->where('t.att_id = :attributeId')
+            ->setParameter('attributeId', $this->get('id'));
+
+        $uuids = [];
+        foreach ($subResults as $subResult) {
+            $uuids[$subResult['pid']]  = $subResult['pid'];
+            $uuids[$subResult['uuid']] = $subResult['uuid'];
+        }
+
+        $orX = [];
+        foreach (array_values($uuids) as $key => $uuid) {
+            $orX[] = sprintf('t.value LIKE :value_%s', $key);
+            $builder->setParameter('value_' . $key, '%' . $uuid . '%');
+        }
+        $builder->andWhere($builder->expr()->or(...$orX));
+
+        $statement = $builder->executeQuery();
+
+        // Return value list as list<mixed>, parent function wants a list<string> so we make a cast.
+        return array_map(static fn(mixed $value) => (string) $value, $statement->fetchFirstColumn());
     }
 }

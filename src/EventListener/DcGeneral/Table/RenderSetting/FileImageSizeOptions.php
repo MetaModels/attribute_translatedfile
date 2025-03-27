@@ -19,19 +19,29 @@
 
 declare(strict_types=1);
 
-namespace MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\DcaSetting;
+namespace MetaModels\AttributeTranslatedFileBundle\EventListener\DcGeneral\Table\RenderSetting;
 
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
 use Doctrine\DBAL\Connection;
-use MetaModels\CoreBundle\EventListener\DcGeneral\Table\DcaSetting\AbstractListener;
+use MetaModels\AttributeTranslatedFileBundle\EventListener\ImageSizeOptionsProvider;
+use MetaModels\CoreBundle\EventListener\DcGeneral\Table\RenderSetting\AbstractListener;
 use MetaModels\IFactory;
 
 /**
- * Add the options for the file widget mode.
+ * Add the options for the file image size.
  */
-class FileWidgetModeOptions extends AbstractListener
+final class FileImageSizeOptions extends AbstractListener
 {
+    public function __construct(
+        RequestScopeDeterminator $scopeDeterminator,
+        IFactory $factory,
+        Connection $connection,
+        private readonly ImageSizeOptionsProvider $optionsProvider,
+    ) {
+        parent::__construct($scopeDeterminator, $factory, $connection);
+    }
+
     /**
      * Invoke the event.
      *
@@ -42,28 +52,14 @@ class FileWidgetModeOptions extends AbstractListener
     public function __invoke(GetPropertyOptionsEvent $event): void
     {
         if (
-            ('file_widgetMode' !== $event->getPropertyName())
+            ('file_imageSize' !== $event->getPropertyName())
             || (false === $this->wantToHandle($event))
-            || (false === $this->isAttributeTranslatedFile($event))
+            || (false === $this->isAttributeFile($event))
         ) {
             return;
         }
 
-        $this->addOptions($event);
-    }
-
-    /**
-     * Add the options.
-     *
-     * @param GetPropertyOptionsEvent $event The event.
-     *
-     * @return void
-     */
-    private function addOptions(GetPropertyOptionsEvent $event): void
-    {
-        $addOptions = ['downloads', 'gallery'];
-
-        $event->setOptions(\array_values(\array_unique(\array_merge($event->getOptions() ?? [], $addOptions))));
+        $this->optionsProvider->addOptions($event);
     }
 
     /**
@@ -73,7 +69,7 @@ class FileWidgetModeOptions extends AbstractListener
      *
      * @return bool
      */
-    private function isAttributeTranslatedFile(GetPropertyOptionsEvent $event): bool
+    private function isAttributeFile(GetPropertyOptionsEvent $event): bool
     {
         $builder = $this->connection->createQueryBuilder();
         $builder
